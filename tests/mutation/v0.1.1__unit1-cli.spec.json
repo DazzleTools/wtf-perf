@@ -1,0 +1,18 @@
+{
+  "test_command": ["python", "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests/test_cli.py", "tests/test_version.py"],
+  "mutations": [
+    {"id": "M1", "file": "wtf_perf/cli.py", "original": "    if entries:\n", "mutated": "    if not entries:\n", "note": "Inverted guard: the tools section is emitted only when there are no entries."},
+    {"id": "M2", "file": "wtf_perf/cli.py", "original": "avail = max(20, width - label_w - 4)", "mutated": "avail = min(20, width - label_w - 4)", "note": "max/min swap on description width."},
+    {"id": "M3", "file": "wtf_perf/cli.py", "original": "if len(desc) > avail:", "mutated": "if len(desc) >= avail:", "note": "Boundary: exact-fit description truncated."},
+    {"id": "M4", "file": "wtf_perf/cli.py", "original": "desc = desc[: avail - 3] + \"...\"", "mutated": "desc = desc[: avail] + \"...\"", "note": "Off-by-three: truncated description overruns avail."},
+    {"id": "M5", "file": "wtf_perf/cli.py", "original": "out.append(f\"  {e['name']:<{label_w}}  {desc}\")", "mutated": "out.append(f\"  {e['name']:>{label_w}}  {desc}\")", "note": "Tool names right-aligned."},
+    {"id": "M6", "file": "wtf_perf/cli.py", "original": "ex_w = max(len(label) for label, _ in _HELP_EXAMPLES)", "mutated": "ex_w = min(len(label) for label, _ in _HELP_EXAMPLES)", "note": "Example column width from shortest label."},
+    {"id": "M7", "file": "wtf_perf/cli.py", "original": "label_w = max(len(e[\"name\"]) for e in entries)", "mutated": "label_w = max(len(e[\"description\"]) for e in entries)", "note": "Label column sized by description length."},
+    {"id": "M8", "file": "wtf_perf/cli.py", "original": "return \"\\n\".join(out)", "mutated": "return \"\".join(out)", "note": "Epilog collapsed to one line."},
+    {"id": "M9", "file": "wtf_perf/cli.py", "original": "package_root = Path(__file__).resolve().parent", "mutated": "package_root = Path.cwd()", "note": "Root from cwd instead of file location."},
+    {"id": "M10", "file": "wtf_perf/cli.py", "original": "version_info=(get_display_version(), __version__),", "mutated": "version_info=(__version__, get_display_version()),", "note": "Swapped version tuple."},
+    {"id": "M11", "file": "wtf_perf/cli.py", "original": "    engine.epilog_builder = lambda projects: _build_epilog(projects, engine)\n", "mutated": "    pass  # mutant: custom epilog never installed\n", "note": "Custom epilog never installed."},
+    {"id": "M12", "file": "wtf_perf/cli.py", "original": "    if argv is None:\n", "mutated": "    if not argv:\n", "note": "main([]) reads sys.argv instead of the explicit empty argv."},
+    {"id": "M13", "file": "wtf_perf/cli.py", "original": "return build_engine().run(argv)", "mutated": "return build_engine().run(sys.argv[1:])", "note": "argv parameter ignored."}
+  ]
+}

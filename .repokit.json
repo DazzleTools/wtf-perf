@@ -28,7 +28,7 @@
   ],
   "description": "Why is my Windows PC busy? Accounts for every point of CPU: processes, short-lived processes, interrupts and speed scaling",
   "author": {
-    "name": "Dustin",
+    "name": "Dustin Darcy",
     "email": "6962246+djdarcy@users.noreply.github.com"
   }
 }

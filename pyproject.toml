@@ -12,7 +12,7 @@ license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 requires-python = ">=3.10"
 authors = [
-    {name = "Dustin", email = "6962246+djdarcy@users.noreply.github.com"},
+    {name = "Dustin Darcy", email = "6962246+djdarcy@users.noreply.github.com"},
 ]
 keywords = []
 # No `License ::` classifier: setuptools 77+ refuses one beside a license
@@ -21,7 +21,7 @@ classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Environment :: Console",
     "Intended Audience :: Developers",
-    "Operating System :: OS Independent",
+    "Operating System :: Microsoft :: Windows",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -30,7 +30,11 @@ classifiers = [
     "Topic :: Utilities",
 ]
 
-dependencies = []
+dependencies = [
+    "dazzlecmd-lib>=0.10,<1.0",
+    "rich>=13",
+    "dazzle-loglib>=0.3",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -52,6 +56,17 @@ version = {attr = "wtf_perf._version.PIP_VERSION"}
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["wtf_perf", "wtf_perf.*"]
+
+# Bundle the kit definitions and tool manifests as package data.
+[tool.setuptools.package-data]
+wtf_perf = [
+    "kits/*.json",
+    "tools/**/*",
+    # The per-tool manifests are named `.wtf-perf.json` (leading dot). setuptools'
+    # `*` glob skips dotfiles, so `tools/**/*` above silently drops them and the
+    # installed CLI finds no tools -- list them explicitly so the wheel includes them.
+    "tools/**/.wtf-perf.json",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

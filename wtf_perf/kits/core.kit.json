@@ -1,0 +1,13 @@
+{
+    "name": "core",
+    "version": "0.1.0",
+    "description": "Account for where CPU and file-operation load is going on a Windows machine.",
+    "author": "djdarcy",
+    "always_active": true,
+    "tools_dir": "tools",
+    "manifest": ".wtf-perf.json",
+    "tools": [
+        "core:cpu"
+    ],
+    "notes": "First kit of the wtf-perf aggregator. cpu: the reconciliation ledger for the CPU headline. Planned drill-downs (io, mem) attach here as further tools sharing one sampler."
+}

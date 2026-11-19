@@ -1,0 +1,21 @@
+{
+    "name": "cpu",
+    "namespace": "core",
+    "version": "0.1.0",
+    "description": "Account for every point of the CPU headline: processes, short-lived processes, interrupts, speed scaling.",
+    "category": "core",
+    "author": "djdarcy",
+    "platforms": ["windows"],
+    "runtime": {
+        "type": "python",
+        "entry_point": "main",
+        "script_path": "cpu.py"
+    },
+    "diagnostics": {
+        "event_logs": [],
+        "required_privileges": "user",
+        "supports_history": false,
+        "supports_ai": false
+    },
+    "notes": "Read-only. Samples the kernel process table (no WMI). supports_ai turns true when the AI unit ships."
+}

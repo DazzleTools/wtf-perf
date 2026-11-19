@@ -8,7 +8,7 @@
 [![License: GPL v3](https://img.shields.io/badge/license-GPL%20v3-green.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
 [![GitHub Discussions](https://img.shields.io/github/discussions/DazzleTools/wtf-perf)](https://github.com/DazzleTools/wtf-perf/discussions)
 [![Installs](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/djdarcy/PLACEHOLDER/raw/installs.json)](https://dazzletools.github.io/wtf-perf/stats/#installs)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://github.com/DazzleTools/wtf-perf)
+[![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)](https://github.com/DazzleTools/wtf-perf)
 
 Why is my Windows PC busy? Accounts for every point of CPU: processes, short-lived processes, interrupts and speed scaling
 
@@ -29,9 +29,13 @@ pip install -e ".[dev]"
 ## Usage
 
 ```bash
-wtf-perf --help
+wtf-perf --help          # the tools and some examples
+wtf-perf list            # the available tools
+wtf-perf cpu             # account for the CPU headline (in development)
 python -m wtf_perf --version
 ```
+
+wtf-perf is part of the wtf-windows family of diagnostics and is built on dazzlecmd-lib, so each drill-down is a tool under one command.
 
 ## Development
 
@@ -73,6 +77,6 @@ Like the project?
 
 ## License
 
-wtf-perf, Copyright (C) 2026 Dustin
+wtf-perf, Copyright (C) 2026 Dustin Darcy
 
 Licensed under the GNU General Public License v3.0 or later (GPL-3.0-or-later) -- see [LICENSE](LICENSE).

@@ -1,0 +1,264 @@
+{
+  "harness": {
+    "name": "mutation_sweep.py",
+    "version": "0.2.0"
+  },
+  "environment": {
+    "python": "3.12.0",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "root": ".",
+    "test_command": [
+      "python",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "tests/test_cli.py",
+      "tests/test_version.py"
+    ],
+    "timestamp": "2026-11-18T19:34:56-05:00"
+  },
+  "results": [
+    {
+      "id": "M1",
+      "file": "wtf_perf/cli.py",
+      "note": "Inverted guard: the tools section is emitted only when there are no entries.",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": "s = <_pytest.capture.CaptureFixture object at 0x000001CFFA8C3FE0>\n\n    def test_cli_epilog_lists_all_tools(capsys):\n        \"\"\"`wtf-perf -h` epilog should enumerate every registered tool in its\n        `tools:` section. The check reads only that section: the hard-coded\n        \"getting started\" examples also mention `cpu`, so a whole-output search\n        would pass even with no tools registered (red-green audit, 2026-11-18).\"\"\"\n        from wtf_perf.cli import main\n    \n        with pytest.raises(SystemExit) as exc:\n            main([\"-h\"])\n        assert exc.value.code == 0\n        lines = capsys.readouterr().out.splitlines()\n>       assert \"tools:\" in lines, \"`wtf-perf -h` has no tools: section\"\nE       AssertionError: `wtf-perf -h` has no tools: section\nE       assert 'tools:' in ['usage: wtf-perf [-h] [--version]', '', 'Why is my Windows PC busy? Accounts for every point of CPU (wtf-windows family).', '', 'options:', '  -h, --help     show this help message and exit', ...]\n\ntests\\test_cli.py:165: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_cli.py::test_epilog_tool_rows_fit_the_terminal_width - Valu...\nFAILED tests/test_cli.py::test_epilog_shows_the_full_description_when_wide - ...\nFAILED tests/test_cli.py::test_cli_epilog_lists_all_tools - AssertionError: `...\n3 failed, 14 passed in 2.46s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_cli.py::test_cli_epilog_lists_all_tools",
+        "tests/test_cli.py::test_epilog_shows_the_full_description_when_wide",
+        "tests/test_cli.py::test_epilog_tool_rows_fit_the_terminal_width"
+      ]
+    },
+    {
+      "id": "M2",
+      "file": "wtf_perf/cli.py",
+      "note": "max/min swap on description width.",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": "......F..........                                                        [100%]\n================================== FAILURES ===================================\n______________ test_epilog_shows_the_full_description_when_wide _______________\n\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B2E3580860>\ncapsys = <_pytest.capture.CaptureFixture object at 0x000001B2E3580500>\n\n    def test_epilog_shows_the_full_description_when_wide(monkeypatch, capsys):\n        \"\"\"With room to spare, a tool's description is printed whole.\"\"\"\n        manifest = json.loads((PKG / \"tools\" / \"core\" / \"cpu\" / \".wtf-perf.json\").read_text(encoding=\"utf-8\"))\n        rows = _section(_epilog(monkeypatch, capsys, 300), \"tools:\")\n>       assert any(manifest[\"description\"] in row for row in rows), rows\nE       AssertionError: ['  cpu  Account for every...']\nE       assert False\nE        +  where False = any(<generator object test_epilog_shows_the_full_description_when_wide.<locals>.<genexpr> at 0x000001B2E4A0A740>)\n\ntests\\test_cli.py:123: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_cli.py::test_epilog_shows_the_full_description_when_wide - ...\n1 failed, 16 passed in 2.23s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_cli.py::test_epilog_shows_the_full_description_when_wide"
+      ]
+    },
+    {
+      "id": "M3",
+      "file": "wtf_perf/cli.py",
+      "note": "Boundary: exact-fit description truncated.",
+      "verdict": "survived",
+      "restore_ok": true,
+      "output_tail": ""
+    },
+    {
+      "id": "M4",
+      "file": "wtf_perf/cli.py",
+      "note": "Off-by-three: truncated description overruns avail.",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": ".....F...........                                                        [100%]\n================================== FAILURES ===================================\n________________ test_epilog_tool_rows_fit_the_terminal_width _________________\n\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x00000103A6680EF0>\ncapsys = <_pytest.capture.CaptureFixture object at 0x00000103A6680920>\n\n    def test_epilog_tool_rows_fit_the_terminal_width(monkeypatch, capsys):\n        \"\"\"Long descriptions are truncated so each tools: row fits the width.\"\"\"\n        width = 80\n        for row in _section(_epilog(monkeypatch, capsys, width), \"tools:\"):\n>           assert len(row) <= width, f\"row overruns {width} columns: {row!r}\"\nE           AssertionError: row overruns 80 columns: '  cpu  Account for every point of the CPU headline: processes, short-lived proce...'\nE           assert 83 <= 80\nE            +  where 83 = len('  cpu  Account for every point of the CPU headline: processes, short-lived proce...')\n\ntests\\test_cli.py:116: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_cli.py::test_epilog_tool_rows_fit_the_terminal_width - Asse...\n1 failed, 16 passed in 1.65s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_cli.py::test_epilog_tool_rows_fit_the_terminal_width"
+      ]
+    },
+    {
+      "id": "M5",
+      "file": "wtf_perf/cli.py",
+      "note": "Tool names right-aligned.",
+      "verdict": "survived",
+      "restore_ok": true,
+      "output_tail": ""
+    },
+    {
+      "id": "M6",
+      "file": "wtf_perf/cli.py",
+      "note": "Example column width from shortest label.",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": ".......F.........                                                        [100%]\n================================== FAILURES ===================================\n__________ test_epilog_getting_started_descriptions_share_one_column __________\n\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000023FB5B20BF0>\ncapsys = <_pytest.capture.CaptureFixture object at 0x0000023FB5B20D40>\n\n    def test_epilog_getting_started_descriptions_share_one_column(monkeypatch, capsys):\n        \"\"\"Every getting-started description starts in the same column.\"\"\"\n        from wtf_perf.cli import _HELP_EXAMPLES\n    \n        rows = _section(_epilog(monkeypatch, capsys, 120), \"getting started:\")\n        starts = {row.index(desc) for row, (_, desc) in zip(rows, _HELP_EXAMPLES)}\n>       assert len(starts) == 1, rows\nE       AssertionError: ['  wtf-perf cpu  sample for a few seconds and account for the CPU headline', '  wtf-perf list  list the available tools']\nE       assert 2 == 1\nE        +  where 2 = len({16, 17})\n\ntests\\test_cli.py:132: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_cli.py::test_epilog_getting_started_descriptions_share_one_column\n1 failed, 16 passed in 1.99s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_cli.py::test_epilog_getting_started_descriptions_share_one_column"
+      ]
+    },
+    {
+      "id": "M7",
+      "file": "wtf_perf/cli.py",
+      "note": "Label column sized by description length.",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": ".....F...........                                                        [100%]\n================================== FAILURES ===================================\n________________ test_epilog_tool_rows_fit_the_terminal_width _________________\n\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000025920B30A10>\ncapsys = <_pytest.capture.CaptureFixture object at 0x0000025920B30AA0>\n\n    def test_epilog_tool_rows_fit_the_terminal_width(monkeypatch, capsys):\n        \"\"\"Long descriptions are truncated so each tools: row fits the width.\"\"\"\n        width = 80\n        for row in _section(_epilog(monkeypatch, capsys, width), \"tools:\"):\n>           assert len(row) <= width, f\"row overruns {width} columns: {row!r}\"\nE           AssertionError: row overruns 80 columns: '  cpu                                                                                                        Account for every...'\nE           assert 129 <= 80\nE            +  where 129 = len('  cpu                                                                                                        Account for every...')\n\ntests\\test_cli.py:116: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_cli.py::test_epilog_tool_rows_fit_the_terminal_width - Asse...\n1 failed, 16 passed in 1.97s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_cli.py::test_epilog_tool_rows_fit_the_terminal_width"
+      ]
+    },
+    {
+      "id": "M8",
+      "file": "wtf_perf/cli.py",
+      "note": "Epilog collapsed to one line.",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": "epilog_lists_all_tools(capsys):\n        \"\"\"`wtf-perf -h` epilog should enumerate every registered tool in its\n        `tools:` section. The check reads only that section: the hard-coded\n        \"getting started\" examples also mention `cpu`, so a whole-output search\n        would pass even with no tools registered (red-green audit, 2026-11-18).\"\"\"\n        from wtf_perf.cli import main\n    \n        with pytest.raises(SystemExit) as exc:\n            main([\"-h\"])\n        assert exc.value.code == 0\n        lines = capsys.readouterr().out.splitlines()\n>       assert \"tools:\" in lines, \"`wtf-perf -h` has no tools: section\"\nE       AssertionError: `wtf-perf -h` has no tools: section\nE       assert 'tools:' in ['usage: wtf-perf [-h] [--version]', '', 'Why is my Windows PC busy? Accounts for every point of CPU (wtf-windows family).', '', 'options:', '  -h, --help     show this help message and exit', ...]\n\ntests\\test_cli.py:165: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_cli.py::test_epilog_tool_rows_fit_the_terminal_width - Valu...\nFAILED tests/test_cli.py::test_epilog_shows_the_full_description_when_wide - ...\nFAILED tests/test_cli.py::test_epilog_getting_started_descriptions_share_one_column\nFAILED tests/test_cli.py::test_cli_epilog_lists_all_tools - AssertionError: `...\n4 failed, 13 passed in 2.23s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_cli.py::test_cli_epilog_lists_all_tools",
+        "tests/test_cli.py::test_epilog_getting_started_descriptions_share_one_column",
+        "tests/test_cli.py::test_epilog_shows_the_full_description_when_wide",
+        "tests/test_cli.py::test_epilog_tool_rows_fit_the_terminal_width"
+      ]
+    },
+    {
+      "id": "M9",
+      "file": "wtf_perf/cli.py",
+      "note": "Root from cwd instead of file location.",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": "rate every registered tool in its\n        `tools:` section. The check reads only that section: the hard-coded\n        \"getting started\" examples also mention `cpu`, so a whole-output search\n        would pass even with no tools registered (red-green audit, 2026-11-18).\"\"\"\n        from wtf_perf.cli import main\n    \n        with pytest.raises(SystemExit) as exc:\n            main([\"-h\"])\n        assert exc.value.code == 0\n        lines = capsys.readouterr().out.splitlines()\n>       assert \"tools:\" in lines, \"`wtf-perf -h` has no tools: section\"\nE       AssertionError: `wtf-perf -h` has no tools: section\nE       assert 'tools:' in ['usage: wtf-perf [-h] [--version]', '', 'Why is my Windows PC busy? Accounts for every point of CPU (wtf-windows family).', '', 'options:', '  -h, --help     show this help message and exit', ...]\n\ntests\\test_cli.py:165: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_cli.py::test_list_finds_tools_from_a_foreign_working_directory\nFAILED tests/test_cli.py::test_cpu_dispatches_from_a_foreign_working_directory\nFAILED tests/test_cli.py::test_epilog_tool_rows_fit_the_terminal_width - Valu...\nFAILED tests/test_cli.py::test_epilog_shows_the_full_description_when_wide - ...\nFAILED tests/test_cli.py::test_cli_epilog_lists_all_tools - AssertionError: `...\n5 failed, 12 passed in 1.79s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_cli.py::test_cli_epilog_lists_all_tools",
+        "tests/test_cli.py::test_cpu_dispatches_from_a_foreign_working_directory",
+        "tests/test_cli.py::test_epilog_shows_the_full_description_when_wide",
+        "tests/test_cli.py::test_epilog_tool_rows_fit_the_terminal_width",
+        "tests/test_cli.py::test_list_finds_tools_from_a_foreign_working_directory"
+      ]
+    },
+    {
+      "id": "M10",
+      "file": "wtf_perf/cli.py",
+      "note": "Swapped version tuple.",
+      "verdict": "survived",
+      "restore_ok": true,
+      "output_tail": ""
+    },
+    {
+      "id": "M11",
+      "file": "wtf_perf/cli.py",
+      "note": "Custom epilog never installed.",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": "epilog_lists_all_tools(capsys):\n        \"\"\"`wtf-perf -h` epilog should enumerate every registered tool in its\n        `tools:` section. The check reads only that section: the hard-coded\n        \"getting started\" examples also mention `cpu`, so a whole-output search\n        would pass even with no tools registered (red-green audit, 2026-11-18).\"\"\"\n        from wtf_perf.cli import main\n    \n        with pytest.raises(SystemExit) as exc:\n            main([\"-h\"])\n        assert exc.value.code == 0\n        lines = capsys.readouterr().out.splitlines()\n>       assert \"tools:\" in lines, \"`wtf-perf -h` has no tools: section\"\nE       AssertionError: `wtf-perf -h` has no tools: section\nE       assert 'tools:' in ['usage: wtf-perf [-h] [--version]', '', 'Why is my Windows PC busy? Accounts for every point of CPU (wtf-windows family).', '', 'options:', '  -h, --help     show this help message and exit', ...]\n\ntests\\test_cli.py:165: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_cli.py::test_epilog_tool_rows_fit_the_terminal_width - Valu...\nFAILED tests/test_cli.py::test_epilog_shows_the_full_description_when_wide - ...\nFAILED tests/test_cli.py::test_epilog_getting_started_descriptions_share_one_column\nFAILED tests/test_cli.py::test_cli_epilog_lists_all_tools - AssertionError: `...\n4 failed, 13 passed in 1.81s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_cli.py::test_cli_epilog_lists_all_tools",
+        "tests/test_cli.py::test_epilog_getting_started_descriptions_share_one_column",
+        "tests/test_cli.py::test_epilog_shows_the_full_description_when_wide",
+        "tests/test_cli.py::test_epilog_tool_rows_fit_the_terminal_width"
+      ]
+    },
+    {
+      "id": "M12",
+      "file": "wtf_perf/cli.py",
+      "note": "main([]) reads sys.argv instead of the explicit empty argv.",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": "                                                      [100%]\n================================== FAILURES ===================================\n______________ test_main_hands_its_argv_to_the_engine_unchanged _______________\n\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000019C1D9C1D00>\n\n    def test_main_hands_its_argv_to_the_engine_unchanged(monkeypatch):\n        \"\"\"main(argv) dispatches exactly argv -- an explicit empty list included --\n        and never falls back to the process's own command line.\"\"\"\n        import wtf_perf.cli as cli\n    \n        seen = []\n    \n        class FakeEngine:\n            def run(self, argv):\n                seen.append(argv)\n                return 0\n    \n        monkeypatch.setattr(cli, \"build_engine\", lambda: FakeEngine())\n        monkeypatch.setattr(sys, \"argv\", [\"wtf-perf\", \"sentinel-from-sys-argv\"])\n        assert cli.main([]) == 0\n        assert cli.main([\"list\"]) == 0\n>       assert seen == [[], [\"list\"]]\nE       AssertionError: assert [['sentinel-f...v'], ['list']] == [[], ['list']]\nE         \nE         At index 0 diff: ['sentinel-from-sys-argv'] != []\nE         Use -v to get more diff\n\ntests\\test_cli.py:151: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_cli.py::test_main_hands_its_argv_to_the_engine_unchanged - ...\n1 failed, 16 passed in 2.16s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_cli.py::test_main_hands_its_argv_to_the_engine_unchanged"
+      ]
+    },
+    {
+      "id": "M13",
+      "file": "wtf_perf/cli.py",
+      "note": "argv parameter ignored.",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": " should enumerate every registered tool in its\n        `tools:` section. The check reads only that section: the hard-coded\n        \"getting started\" examples also mention `cpu`, so a whole-output search\n        would pass even with no tools registered (red-green audit, 2026-11-18).\"\"\"\n        from wtf_perf.cli import main\n    \n        with pytest.raises(SystemExit) as exc:\n            main([\"-h\"])\n>       assert exc.value.code == 0\nE       assert 2 == 0\nE        +  where 2 = SystemExit(2).code\nE        +    where SystemExit(2) = <ExceptionInfo SystemExit(2) tblen=9>.value\n\ntests\\test_cli.py:163: AssertionError\n---------------------------- Captured stderr call -----------------------------\nusage: wtf-perf [-h] [--version]\nwtf-perf: error: argument <command>: invalid choice: 'no:cacheprovider' (choose from 'info', 'kit', 'list', 'setup', 'tree', 'version', 'cpu')\n=========================== short test summary info ===========================\nFAILED tests/test_cli.py::test_epilog_tool_rows_fit_the_terminal_width - Valu...\nFAILED tests/test_cli.py::test_epilog_shows_the_full_description_when_wide - ...\nFAILED tests/test_cli.py::test_epilog_getting_started_descriptions_share_one_column\nFAILED tests/test_cli.py::test_main_hands_its_argv_to_the_engine_unchanged - ...\nFAILED tests/test_cli.py::test_cli_epilog_lists_all_tools - assert 2 == 0\n5 failed, 12 passed in 1.83s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_cli.py::test_cli_epilog_lists_all_tools",
+        "tests/test_cli.py::test_epilog_getting_started_descriptions_share_one_column",
+        "tests/test_cli.py::test_epilog_shows_the_full_description_when_wide",
+        "tests/test_cli.py::test_epilog_tool_rows_fit_the_terminal_width",
+        "tests/test_cli.py::test_main_hands_its_argv_to_the_engine_unchanged"
+      ]
+    }
+  ],
+  "summary": {
+    "killed": 10,
+    "survived": 3
+  },
+  "anomalies": [],
+  "overlap": {
+    "kills": {
+      "tests/test_cli.py::test_cli_epilog_lists_all_tools": [
+        "M1",
+        "M11",
+        "M13",
+        "M8",
+        "M9"
+      ],
+      "tests/test_cli.py::test_cpu_dispatches_from_a_foreign_working_directory": [
+        "M9"
+      ],
+      "tests/test_cli.py::test_epilog_getting_started_descriptions_share_one_column": [
+        "M11",
+        "M13",
+        "M6",
+        "M8"
+      ],
+      "tests/test_cli.py::test_epilog_shows_the_full_description_when_wide": [
+        "M1",
+        "M11",
+        "M13",
+        "M2",
+        "M8",
+        "M9"
+      ],
+      "tests/test_cli.py::test_epilog_tool_rows_fit_the_terminal_width": [
+        "M1",
+        "M11",
+        "M13",
+        "M4",
+        "M7",
+        "M8",
+        "M9"
+      ],
+      "tests/test_cli.py::test_list_finds_tools_from_a_foreign_working_directory": [
+        "M9"
+      ],
+      "tests/test_cli.py::test_main_hands_its_argv_to_the_engine_unchanged": [
+        "M12",
+        "M13"
+      ]
+    },
+    "identical": [
+      [
+        "tests/test_cli.py::test_cpu_dispatches_from_a_foreign_working_directory",
+        "tests/test_cli.py::test_list_finds_tools_from_a_foreign_working_directory"
+      ]
+    ],
+    "contained": [
+      [
+        "tests/test_cli.py::test_cli_epilog_lists_all_tools",
+        "tests/test_cli.py::test_epilog_shows_the_full_description_when_wide"
+      ],
+      [
+        "tests/test_cli.py::test_cli_epilog_lists_all_tools",
+        "tests/test_cli.py::test_epilog_tool_rows_fit_the_terminal_width"
+      ],
+      [
+        "tests/test_cli.py::test_cpu_dispatches_from_a_foreign_working_directory",
+        "tests/test_cli.py::test_cli_epilog_lists_all_tools"
+      ],
+      [
+        "tests/test_cli.py::test_cpu_dispatches_from_a_foreign_working_directory",
+        "tests/test_cli.py::test_epilog_shows_the_full_description_when_wide"
+      ],
+      [
+        "tests/test_cli.py::test_cpu_dispatches_from_a_foreign_working_directory",
+        "tests/test_cli.py::test_epilog_tool_rows_fit_the_terminal_width"
+      ],
+      [
+        "tests/test_cli.py::test_list_finds_tools_from_a_foreign_working_directory",
+        "tests/test_cli.py::test_cli_epilog_lists_all_tools"
+      ],
+      [
+        "tests/test_cli.py::test_list_finds_tools_from_a_foreign_working_directory",
+        "tests/test_cli.py::test_epilog_shows_the_full_description_when_wide"
+      ],
+      [
+        "tests/test_cli.py::test_list_finds_tools_from_a_foreign_working_directory",
+        "tests/test_cli.py::test_epilog_tool_rows_fit_the_terminal_width"
+      ]
+    ],
+    "killed_without_names": []
+  }
+}

@@ -1,0 +1,184 @@
+{
+  "harness": {
+    "name": "mutation_sweep.py",
+    "version": "0.2.0"
+  },
+  "environment": {
+    "python": "3.12.0",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "root": ".",
+    "test_command": [
+      "python",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "tests/test_cli.py",
+      "tests/test_version.py"
+    ],
+    "timestamp": "2026-11-18T19:33:03-05:00"
+  },
+  "results": [
+    {
+      "id": "M1",
+      "file": "wtf_perf/cli.py",
+      "note": "Inverted guard: the tools section is emitted only when there are no entries.",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": "============================== FAILURES ===================================\n_______________________ test_cli_epilog_lists_all_tools _______________________\n\ncapsys = <_pytest.capture.CaptureFixture object at 0x000002ABE046FE30>\n\n    def test_cli_epilog_lists_all_tools(capsys):\n        \"\"\"`wtf-perf -h` epilog should enumerate every registered tool in its\n        `tools:` section. The check reads only that section: the hard-coded\n        \"getting started\" examples also mention `cpu`, so a whole-output search\n        would pass even with no tools registered (red-green audit, 2026-11-18).\"\"\"\n        from wtf_perf.cli import main\n    \n        with pytest.raises(SystemExit) as exc:\n            main([\"-h\"])\n        assert exc.value.code == 0\n        lines = capsys.readouterr().out.splitlines()\n>       assert \"tools:\" in lines, \"`wtf-perf -h` has no tools: section\"\nE       AssertionError: `wtf-perf -h` has no tools: section\nE       assert 'tools:' in ['usage: wtf-perf [-h] [--version]', '', 'Why is my Windows PC busy? Accounts for every point of CPU (wtf-windows family).', '', 'options:', '  -h, --help     show this help message and exit', ...]\n\ntests\\test_cli.py:103: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_cli.py::test_cli_epilog_lists_all_tools - AssertionError: `...\n1 failed, 12 passed in 1.64s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_cli.py::test_cli_epilog_lists_all_tools"
+      ]
+    },
+    {
+      "id": "M2",
+      "file": "wtf_perf/cli.py",
+      "note": "max/min swap on description width.",
+      "verdict": "survived",
+      "restore_ok": true,
+      "output_tail": ""
+    },
+    {
+      "id": "M3",
+      "file": "wtf_perf/cli.py",
+      "note": "Boundary: exact-fit description truncated.",
+      "verdict": "survived",
+      "restore_ok": true,
+      "output_tail": ""
+    },
+    {
+      "id": "M4",
+      "file": "wtf_perf/cli.py",
+      "note": "Off-by-three: truncated description overruns avail.",
+      "verdict": "survived",
+      "restore_ok": true,
+      "output_tail": ""
+    },
+    {
+      "id": "M5",
+      "file": "wtf_perf/cli.py",
+      "note": "Tool names right-aligned.",
+      "verdict": "survived",
+      "restore_ok": true,
+      "output_tail": ""
+    },
+    {
+      "id": "M6",
+      "file": "wtf_perf/cli.py",
+      "note": "Example column width from shortest label.",
+      "verdict": "survived",
+      "restore_ok": true,
+      "output_tail": ""
+    },
+    {
+      "id": "M7",
+      "file": "wtf_perf/cli.py",
+      "note": "Label column sized by description length.",
+      "verdict": "survived",
+      "restore_ok": true,
+      "output_tail": ""
+    },
+    {
+      "id": "M8",
+      "file": "wtf_perf/cli.py",
+      "note": "Epilog collapsed to one line.",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": "============================== FAILURES ===================================\n_______________________ test_cli_epilog_lists_all_tools _______________________\n\ncapsys = <_pytest.capture.CaptureFixture object at 0x000002757193DFD0>\n\n    def test_cli_epilog_lists_all_tools(capsys):\n        \"\"\"`wtf-perf -h` epilog should enumerate every registered tool in its\n        `tools:` section. The check reads only that section: the hard-coded\n        \"getting started\" examples also mention `cpu`, so a whole-output search\n        would pass even with no tools registered (red-green audit, 2026-11-18).\"\"\"\n        from wtf_perf.cli import main\n    \n        with pytest.raises(SystemExit) as exc:\n            main([\"-h\"])\n        assert exc.value.code == 0\n        lines = capsys.readouterr().out.splitlines()\n>       assert \"tools:\" in lines, \"`wtf-perf -h` has no tools: section\"\nE       AssertionError: `wtf-perf -h` has no tools: section\nE       assert 'tools:' in ['usage: wtf-perf [-h] [--version]', '', 'Why is my Windows PC busy? Accounts for every point of CPU (wtf-windows family).', '', 'options:', '  -h, --help     show this help message and exit', ...]\n\ntests\\test_cli.py:103: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_cli.py::test_cli_epilog_lists_all_tools - AssertionError: `...\n1 failed, 12 passed in 2.29s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_cli.py::test_cli_epilog_lists_all_tools"
+      ]
+    },
+    {
+      "id": "M9",
+      "file": "wtf_perf/cli.py",
+      "note": "Root from cwd instead of file location.",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": "sys = <_pytest.capture.CaptureFixture object at 0x0000026D1A4B3440>\n\n    def test_cli_epilog_lists_all_tools(capsys):\n        \"\"\"`wtf-perf -h` epilog should enumerate every registered tool in its\n        `tools:` section. The check reads only that section: the hard-coded\n        \"getting started\" examples also mention `cpu`, so a whole-output search\n        would pass even with no tools registered (red-green audit, 2026-11-18).\"\"\"\n        from wtf_perf.cli import main\n    \n        with pytest.raises(SystemExit) as exc:\n            main([\"-h\"])\n        assert exc.value.code == 0\n        lines = capsys.readouterr().out.splitlines()\n>       assert \"tools:\" in lines, \"`wtf-perf -h` has no tools: section\"\nE       AssertionError: `wtf-perf -h` has no tools: section\nE       assert 'tools:' in ['usage: wtf-perf [-h] [--version]', '', 'Why is my Windows PC busy? Accounts for every point of CPU (wtf-windows family).', '', 'options:', '  -h, --help     show this help message and exit', ...]\n\ntests\\test_cli.py:103: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_cli.py::test_list_finds_tools_from_a_foreign_working_directory\nFAILED tests/test_cli.py::test_cpu_dispatches_from_a_foreign_working_directory\nFAILED tests/test_cli.py::test_cli_epilog_lists_all_tools - AssertionError: `...\n3 failed, 10 passed in 1.61s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_cli.py::test_cli_epilog_lists_all_tools",
+        "tests/test_cli.py::test_cpu_dispatches_from_a_foreign_working_directory",
+        "tests/test_cli.py::test_list_finds_tools_from_a_foreign_working_directory"
+      ]
+    },
+    {
+      "id": "M10",
+      "file": "wtf_perf/cli.py",
+      "note": "Swapped version tuple.",
+      "verdict": "survived",
+      "restore_ok": true,
+      "output_tail": ""
+    },
+    {
+      "id": "M11",
+      "file": "wtf_perf/cli.py",
+      "note": "Custom epilog never installed.",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": "============================== FAILURES ===================================\n_______________________ test_cli_epilog_lists_all_tools _______________________\n\ncapsys = <_pytest.capture.CaptureFixture object at 0x000001FD710EFE30>\n\n    def test_cli_epilog_lists_all_tools(capsys):\n        \"\"\"`wtf-perf -h` epilog should enumerate every registered tool in its\n        `tools:` section. The check reads only that section: the hard-coded\n        \"getting started\" examples also mention `cpu`, so a whole-output search\n        would pass even with no tools registered (red-green audit, 2026-11-18).\"\"\"\n        from wtf_perf.cli import main\n    \n        with pytest.raises(SystemExit) as exc:\n            main([\"-h\"])\n        assert exc.value.code == 0\n        lines = capsys.readouterr().out.splitlines()\n>       assert \"tools:\" in lines, \"`wtf-perf -h` has no tools: section\"\nE       AssertionError: `wtf-perf -h` has no tools: section\nE       assert 'tools:' in ['usage: wtf-perf [-h] [--version]', '', 'Why is my Windows PC busy? Accounts for every point of CPU (wtf-windows family).', '', 'options:', '  -h, --help     show this help message and exit', ...]\n\ntests\\test_cli.py:103: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_cli.py::test_cli_epilog_lists_all_tools - AssertionError: `...\n1 failed, 12 passed in 1.80s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_cli.py::test_cli_epilog_lists_all_tools"
+      ]
+    },
+    {
+      "id": "M12",
+      "file": "wtf_perf/cli.py",
+      "note": "main([]) reads sys.argv instead of the explicit empty argv.",
+      "verdict": "survived",
+      "restore_ok": true,
+      "output_tail": ""
+    },
+    {
+      "id": "M13",
+      "file": "wtf_perf/cli.py",
+      "note": "argv parameter ignored.",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": "       [100%]\n================================== FAILURES ===================================\n_______________________ test_cli_epilog_lists_all_tools _______________________\n\ncapsys = <_pytest.capture.CaptureFixture object at 0x0000028090B570B0>\n\n    def test_cli_epilog_lists_all_tools(capsys):\n        \"\"\"`wtf-perf -h` epilog should enumerate every registered tool in its\n        `tools:` section. The check reads only that section: the hard-coded\n        \"getting started\" examples also mention `cpu`, so a whole-output search\n        would pass even with no tools registered (red-green audit, 2026-11-18).\"\"\"\n        from wtf_perf.cli import main\n    \n        with pytest.raises(SystemExit) as exc:\n            main([\"-h\"])\n>       assert exc.value.code == 0\nE       assert 2 == 0\nE        +  where 2 = SystemExit(2).code\nE        +    where SystemExit(2) = <ExceptionInfo SystemExit(2) tblen=9>.value\n\ntests\\test_cli.py:101: AssertionError\n---------------------------- Captured stderr call -----------------------------\nusage: wtf-perf [-h] [--version]\nwtf-perf: error: argument <command>: invalid choice: 'no:cacheprovider' (choose from 'info', 'kit', 'list', 'setup', 'tree', 'version', 'cpu')\n=========================== short test summary info ===========================\nFAILED tests/test_cli.py::test_cli_epilog_lists_all_tools - assert 2 == 0\n1 failed, 12 passed in 1.81s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_cli.py::test_cli_epilog_lists_all_tools"
+      ]
+    }
+  ],
+  "summary": {
+    "killed": 5,
+    "survived": 8
+  },
+  "anomalies": [],
+  "overlap": {
+    "kills": {
+      "tests/test_cli.py::test_cli_epilog_lists_all_tools": [
+        "M1",
+        "M11",
+        "M13",
+        "M8",
+        "M9"
+      ],
+      "tests/test_cli.py::test_cpu_dispatches_from_a_foreign_working_directory": [
+        "M9"
+      ],
+      "tests/test_cli.py::test_list_finds_tools_from_a_foreign_working_directory": [
+        "M9"
+      ]
+    },
+    "identical": [
+      [
+        "tests/test_cli.py::test_cpu_dispatches_from_a_foreign_working_directory",
+        "tests/test_cli.py::test_list_finds_tools_from_a_foreign_working_directory"
+      ]
+    ],
+    "contained": [
+      [
+        "tests/test_cli.py::test_cpu_dispatches_from_a_foreign_working_directory",
+        "tests/test_cli.py::test_cli_epilog_lists_all_tools"
+      ],
+      [
+        "tests/test_cli.py::test_list_finds_tools_from_a_foreign_working_directory",
+        "tests/test_cli.py::test_cli_epilog_lists_all_tools"
+      ]
+    ],
+    "killed_without_names": []
+  }
+}

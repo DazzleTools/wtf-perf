@@ -6,10 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-18
+
+### Added
+- `wtf-perf` is now a dazzlecmd-lib aggregator: `wtf-perf list` shows the tools, `wtf-perf -h` lists them with examples, and the command works from any directory.
+- A first tool, `cpu`, registered and dispatchable (its measurements arrive in the next releases).
+
 ## [0.1.0] - 2026-11-18
 
 ### Added
 - The project's structure, from git-repokit.
 
-[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/DazzleTools/wtf-perf/releases/tag/v0.1.0

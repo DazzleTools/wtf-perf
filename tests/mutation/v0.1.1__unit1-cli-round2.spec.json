@@ -1,0 +1,15 @@
+{
+  "test_command": ["python", "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests/test_cli.py", "tests/test_version.py"],
+  "mutations": [
+    {"id": "R1", "file": "wtf_perf/cli.py", "original": "width - label_w - 4", "mutated": "width - label_w + 4", "note": "sign flip in available width"},
+    {"id": "R2", "file": "wtf_perf/cli.py", "original": "desc = desc[: avail - 3] + \"...\"", "mutated": "desc = desc[: avail - 3]", "note": "truncation drops the ellipsis"},
+    {"id": "R3", "file": "wtf_perf/cli.py", "original": "show_mode=\"default\"", "mutated": "show_mode=\"all\"", "note": "wrong show_mode"},
+    {"id": "R4", "file": "wtf_perf/cli.py", "original": "kit_filter=None", "mutated": "kit_filter=\"core\"", "note": "inventory filtered to one kit"},
+    {"id": "R5", "file": "wtf_perf/cli.py", "original": "shutil.get_terminal_size((80, 24)).columns", "mutated": "shutil.get_terminal_size((80, 24)).lines", "note": "height instead of width"},
+    {"id": "R6", "file": "wtf_perf/cli.py", "original": "len(e[\"name\"]) for e in entries)", "mutated": "len(e[\"name\"]) for e in entries) - 1", "note": "name column one short"},
+    {"id": "R7", "file": "wtf_perf/cli.py", "original": "out.append(\"getting started:\")", "mutated": "out.append(\"examples:\")", "note": "wrong section header"},
+    {"id": "R8", "file": "wtf_perf/cli.py", "original": "        tools_dir=\"tools\",\n        kits_dir=\"kits\",", "mutated": "        tools_dir=\"kits\",\n        kits_dir=\"tools\",", "note": "tools_dir and kits_dir swapped"},
+    {"id": "R9", "file": "wtf_perf/cli.py", "original": "manifest=\".wtf-perf.json\"", "mutated": "manifest=\"wtf-perf.json\"", "note": "manifest name loses its dot"},
+    {"id": "R10", "file": "wtf_perf/cli.py", "original": "project_root=str(package_root)", "mutated": "project_root=str(package_root.parent)", "note": "root one directory up"}
+  ]
+}
