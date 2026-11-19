@@ -26,8 +26,12 @@ built (2026-09-04):
   ``/api/v0/models``, which hangs off the server ROOT, not off ``/v1``. A
   server without that endpoint (Ollama, llama.cpp, every hosted provider)
   answers "cannot say", a third value that must never be read as "nothing".
-* **A client timeout does not cancel server-side work**, so there is no
-  retry in here; the caller re-runs if it wants one. An HTTP error is
+* **There is no retry in here**; the caller re-runs if it wants one. (A
+  client timeout DOES cancel the generation on LM Studio: measured
+  2026-11-18 with a 2 s timeout on a stream:false request, the server log
+  read "Client disconnected. Stopping generation" and "cancel task" the same
+  second; prompt processing already under way finishes first. Other servers
+  are unmeasured. This line used to say the opposite.) An HTTP error is
   reported with the server's own words and is not retried without the
   schema either -- a provider that rejects ``response_format`` for a routed
   model has said something the caller needs to hear.
@@ -314,7 +318,7 @@ class OpenAICompatible:
         if not spec.model and not _on_prem:
             warnings.append(f"no model configured, so the first this endpoint lists was used: "
                             f"{model} -- it decides the answer and the price, and the list can "
-                            f"change between runs; set ai_merge_model to choose")
+                            f"change between runs; " + (spec.hint or "name a model to choose"))
         _, source = self._credential(spec)
         if source:
             reason += f", key from {source}"              # the route, never the value

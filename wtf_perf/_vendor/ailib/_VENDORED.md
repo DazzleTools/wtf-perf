@@ -118,7 +118,7 @@ Everything the old facade did to compensate for a foreign copy -- the registry r
 
 **Source.** Copied with the OS, never retyped, on 2026-11-18 from dazzle-claude-config-tool's `ccs-ai-pass-1` worktree (commit 63ad163, 2026-10-02) -- the newest copy, the same one git-repokit took on 2026-10-24. It differs from ccs `main` by one hunk in `transports/openai_compat.py` (the warning when a hosted endpoint answers with a model nobody chose).
 
-**Known host leak, carried until phase L fixes it:** that hunk's sentence ends "set ai_merge_model to choose", a ccs setting name inside the library. Its purity test does not list that token yet.
+**Known host leak (fixed 2026-11-18, see Changes below):** the hunk's sentence ended with a ccs setting name.
 
 ### Received fingerprints (sha256 over LF-normalised bytes)
 
@@ -143,3 +143,6 @@ Everything the old facade did to compensate for a foreign copy -- the registry r
   - *Atomic writes.* An entry is written to a temp file in the same directory and moved into place with `os.replace` (the idiom dazzle-filekit's `atomic_write_text` uses), so a reader never sees half an entry.
   - *A format version.* Entries carry `"format": 1`; an entry without one reads as format 1, so existing caches stay valid.
   - Tests: `tests/ailib/test_wtf_perf_changes.py` (5); the ported ccs cache tests still pass.
+- **`transports/openai_compat.py` -- 2026-11-18: the host leak removed; the cancellation claim corrected.**
+  - *Host leak.* The "model nobody chose" warning ended "set ai_merge_model to choose", a ccs setting name. It now ends with the spec's own `hint` (the host's words), or "name a model to choose". `ai_merge_` joined the purity test's host tokens, which pass.
+  - *Cancellation.* The module docstring said a client timeout does not cancel server-side work. Measured on LM Studio 2026-11-18 (wtf-perf's `tests/one-offs/probe_lmstudio_timeout_cancel.py`): a 2 s client timeout on a stream:false request was followed the same second by "Client disconnected. Stopping generation" and "cancel task" in the server log. The docstring now says so and that other servers are unmeasured. Behaviour unchanged (still no retry).

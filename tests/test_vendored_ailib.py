@@ -20,9 +20,7 @@ AILIB = VENDOR / "ailib"
 RECORD = AILIB / "_VENDORED.md"
 SECTION = "## wtf-perf's copy"
 
-# Known leak "ai_merge_" (a ccs setting name in openai_compat.py) is not listed
-# until phase L removes it; see _VENDORED.md.
-_FORBIDDEN = ("wtf_perf", "wtf-perf", "dazzle_claude_config", "ccs_", "CCS_")
+_FORBIDDEN = ("wtf_perf", "wtf-perf", "dazzle_claude_config", "ccs_", "CCS_", "ai_merge_")
 
 
 def _py():

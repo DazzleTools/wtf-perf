@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.12] - 2026-11-18
+
+### Fixed
+- The vendored AI library no longer names another tool's setting in its warning about an unchosen model, and its documentation now records that LM Studio cancels a generation when the client times out (measured).
+
 ## [0.1.11] - 2026-11-18
 
 ### Fixed
@@ -75,7 +80,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 - The project's structure, from git-repokit.
 
-[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.11...HEAD
+[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.12...HEAD
+[0.1.12]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.11...v0.1.12
 [0.1.11]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.10...v0.1.11
 [0.1.10]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.9...v0.1.10
 [0.1.9]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.8...v0.1.9
