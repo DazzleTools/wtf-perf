@@ -317,16 +317,26 @@ class SubprocessCli:
             except (OSError, ValueError):
                 pass                                    # the child exited early; its rc says so
         start = time.monotonic()
-        while proc.poll() is None:
-            now = time.monotonic()
-            if req.idle and now - last[0] > req.idle:
+        try:
+            while proc.poll() is None:
+                now = time.monotonic()
+                if req.idle and now - last[0] > req.idle:
+                    proc.kill()
+                    proc.wait()
+                    raise _Stopped(f"{name} gave no sign of life for {req.idle}s -- stopped")
+                if req.timeout and now - start > req.timeout:
+                    proc.kill()
+                    proc.wait()
+                    raise _Stopped(f"{name} ran past the {req.timeout}s ceiling you set -- stopped")
+                time.sleep(0.05)
+        finally:
+            # An interrupt (Ctrl-C) in this loop must not leave the child
+            # running: kill it on any way out that is not a normal exit.
+            if proc.poll() is None:
                 proc.kill()
-                proc.wait()
-                raise _Stopped(f"{name} gave no sign of life for {req.idle}s -- stopped")
-            if req.timeout and now - start > req.timeout:
-                proc.kill()
-                proc.wait()
-                raise _Stopped(f"{name} ran past the {req.timeout}s ceiling you set -- stopped")
-            time.sleep(0.05)
+                try:
+                    proc.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    pass
         t.join(timeout=5)
         return proc.returncode, "".join(lines), ""

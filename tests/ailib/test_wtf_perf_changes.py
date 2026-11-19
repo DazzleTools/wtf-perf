@@ -91,6 +91,40 @@ def test_windows_lookup_prefers_a_runnable_extension_over_a_posix_shim(tmp_path,
     assert cli_mod.find_exe("tool").lower().endswith("tool.cmd")
 
 
+def test_an_interrupt_in_the_reader_kills_the_child(tmp_path, monkeypatch):
+    """Ctrl-C while waiting must not leave the CLI child running. The child is
+    a harmless sleeping Python; the interrupt is simulated in time.sleep."""
+    import subprocess
+    import sys
+    import pytest
+    from wtf_perf._vendor.ailib.transports import cli as cli_mod
+    procs = []
+    real_popen = subprocess.Popen
+
+    def recording_popen(*a, **kw):
+        p = real_popen(*a, **kw)
+        procs.append(p)
+        return p
+
+    calls = {"n": 0}
+
+    def interrupting_sleep(_):
+        calls["n"] += 1
+        if calls["n"] > 2:
+            raise KeyboardInterrupt
+
+    monkeypatch.setattr(cli_mod.subprocess, "Popen", recording_popen)
+    monkeypatch.setattr(cli_mod.time, "sleep", interrupting_sleep)
+    t = cli_mod.CliTransport() if hasattr(cli_mod, "CliTransport") else None
+    if t is None:
+        from wtf_perf._vendor.ailib.backend import transport_for
+        t = transport_for("cli")
+    with pytest.raises(KeyboardInterrupt):
+        t._stream("sleeper", [sys.executable, "-c", "import time; time.sleep(30)"], None, tmp_path, None,
+                  Request(prompt="", idle=0, timeout=0))
+    assert procs and procs[0].poll() is not None, "the child was left running"
+
+
 def test_an_entry_without_a_format_still_reads(tmp_path):
     stub = _Stub()
     first = cache.run(stub, Request(prompt="p"), cache_dir=tmp_path)

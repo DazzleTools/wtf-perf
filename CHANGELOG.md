@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.14] - 2026-11-18
+
+### Fixed
+- Pressing Ctrl-C while an AI command-line backend is answering now stops that backend's process instead of leaving it running.
+
+## [0.1.13] - 2026-11-18
+
+### Fixed
+- `--ai` finds the command-line backends Windows can actually run: an extension-less script on PATH named like the backend no longer makes the call fail with "not a valid Win32 application".
+
 ## [0.1.12] - 2026-11-18
 
 ### Fixed
@@ -80,7 +90,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 - The project's structure, from git-repokit.
 
-[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.12...HEAD
+[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.14...HEAD
+[0.1.14]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.13...v0.1.14
+[0.1.13]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.12...v0.1.13
 [0.1.12]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.11...v0.1.12
 [0.1.11]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.10...v0.1.11
 [0.1.10]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.9...v0.1.10
