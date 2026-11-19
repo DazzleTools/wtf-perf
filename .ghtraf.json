@@ -1,0 +1,13 @@
+{
+  "owner": "DazzleTools",
+  "repo": "wtf-perf",
+  "created": "2026-11-18",
+  "display_name": "wtf-perf",
+  "badge_gist_id": "dbb1670b6ecd1aef7d32abc62a5098bd",
+  "archive_gist_id": "f6b4cca7c826a42ac4321a021661d870",
+  "dashboard_dir": "docs/stats",
+  "schema_version": 1,
+  "ci_workflows": [
+    "CI (Python)"
+  ]
+}

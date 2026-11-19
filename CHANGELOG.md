@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-19
+
+### Added
+- Traffic tracking: a daily GitHub Actions workflow records clones, views and downloads into gists, feeding the README's installs badge and a stats dashboard at https://dazzletools.github.io/wtf-perf/stats/.
+
+### Changed
+- README links to wtf-windows and dazzlecmd-lib; wording tweaks.
+
 ## [0.2.0] - 2026-11-18
 
 ### Added
@@ -114,7 +122,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 - The project's structure, from git-repokit.
 
-[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/DazzleTools/wtf-perf/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.15...v0.2.0
 [0.1.15]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.14...v0.1.15
 [0.1.14]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.13...v0.1.14

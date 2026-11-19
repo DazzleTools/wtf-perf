@@ -7,12 +7,12 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: GPL v3](https://img.shields.io/badge/license-GPL%20v3-green.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
 [![GitHub Discussions](https://img.shields.io/github/discussions/DazzleTools/wtf-perf)](https://github.com/DazzleTools/wtf-perf/discussions)
-[![Installs](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/djdarcy/PLACEHOLDER/raw/installs.json)](https://dazzletools.github.io/wtf-perf/stats/#installs)
+[![Installs](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/djdarcy/dbb1670b6ecd1aef7d32abc62a5098bd/raw/installs.json)](https://dazzletools.github.io/wtf-perf/stats/#installs)
 [![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)](https://github.com/DazzleTools/wtf-perf/blob/main/docs/platform-support.md)
 
-Why is my Windows PC busy? Accounts for every point of CPU: processes, short-lived processes, interrupts and speed scaling
+Why TF is my Windows PC slow? Accounts for every point of CPU: processes, short-lived processes, interrupts and speed scaling
 
-Task Manager can show 45% CPU while its biggest process reads 3%. wtf-perf answers the question that leaves: is something hiding CPU, or are many small things adding up? It samples every process -- including the ones that start and exit in under a second -- reads the system counters over the same window, and accounts for the headline point by point.
+Task Manager can show 45% CPU while its biggest process reads 3%. `wtf-perf` answers the question that leaves- is something hiding CPU, or are many small things adding up? It samples every process (including the ones that start and exit in under a second), reads the system counters over the same window, and accounts for the headline point by point.
 
 ## Installation
 
@@ -41,7 +41,7 @@ wtf-perf list            # the available tools
 python -m wtf_perf --version
 ```
 
-Read-only throughout, and no elevation needed. Through [wtf-windows](https://github.com/DazzleTools/wtf-windows) the same tool runs as `wtf perf`.
+Read-only throughout, and no elevation needed. Through [wtf-windows](https://github.com/djdarcy/wtf-windows) the same tool runs as `wtf perf`.
 
 ### What the report shows
 
@@ -79,7 +79,7 @@ The AI summary sends process names and figures to the backend you choose -- neve
 
 ### Platforms
 
-Windows is the supported platform and the detailed one: it reads the kernel's process table directly (no WMI, no PowerShell), plus the performance counters. The data sources sit behind a per-platform provider set; Linux and macOS have named stubs today, so on those systems `wtf-perf cpu` says which source is missing instead of sampling. What works where, provider by provider: [Platform support](https://github.com/DazzleTools/wtf-perf/blob/main/docs/platform-support.md). A Linux provider is tracked in [#4](https://github.com/DazzleTools/wtf-perf/issues/4).
+Windows is the supported platform and it's detailed. It reads the kernel's process table directly (no WMI, no PowerShell), plus the performance counters. The data sources sit behind a per-platform provider set; Linux and macOS have named stubs today, so on those systems `wtf-perf cpu` says which source is missing instead of sampling. What works where, provider by provider: [Platform support](https://github.com/DazzleTools/wtf-perf/blob/main/docs/platform-support.md). A Linux provider is tracked in [#4](https://github.com/DazzleTools/wtf-perf/issues/4).
 
 ### Known limits
 
@@ -87,7 +87,7 @@ Windows is the supported platform and the detailed one: it reads the kernel's pr
 - **More than 64 logical processors** (more than one processor group) are not handled yet.
 - The thresholds behind the findings were set on one machine; each finding prints its evidence so you can judge it.
 
-wtf-perf is part of the wtf-windows family of diagnostics and is built on dazzlecmd-lib, so each drill-down is a tool under one command.
+wtf-perf is part of the [wtf-windows](https://github.com/djdarcy/wtf-windows) family of diagnostics and is built on [dazzlecmd-lib](https://github.com/DazzleLib/dazzlecmd-lib), so each drill-down is a tool under one command.
 
 ## Development
 
