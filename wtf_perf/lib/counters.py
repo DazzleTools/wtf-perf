@@ -109,7 +109,7 @@ class CounterWindow:
         if self._backend is None:
             try:
                 self._backend = CtypesPdh()
-            except OSError:
+            except (OSError, AttributeError):    # AttributeError: no ctypes.WinDLL off Windows
                 self._backend = None
         if self._backend is not None:
             for name, path in self._counters.items():
