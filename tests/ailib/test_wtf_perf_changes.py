@@ -108,14 +108,19 @@ def test_an_interrupt_in_the_reader_kills_the_child(tmp_path, monkeypatch):
         return p
 
     calls = {"n": 0}
+    import time as real_time
+    import types
 
     def interrupting_sleep(_):
         calls["n"] += 1
         if calls["n"] > 2:
             raise KeyboardInterrupt
 
+    # A fake time module for the transport only: patching time.sleep itself
+    # would also hit Popen.wait's own polling on POSIX (found on Linux).
+    fake_time = types.SimpleNamespace(monotonic=real_time.monotonic, sleep=interrupting_sleep)
     monkeypatch.setattr(cli_mod.subprocess, "Popen", recording_popen)
-    monkeypatch.setattr(cli_mod.time, "sleep", interrupting_sleep)
+    monkeypatch.setattr(cli_mod, "time", fake_time)
     t = cli_mod.CliTransport() if hasattr(cli_mod, "CliTransport") else None
     if t is None:
         from wtf_perf._vendor.ailib.backend import transport_for
