@@ -45,13 +45,16 @@ def render_tier0(console: Console, report: dict, ai_fetcher: Optional[Callable[[
         t.add_row("  speed-scaling uplift (not extra work)", _num(h["uplift"]), f"ratio {_num(h['ratio'], '{:.2f}')}")
     t.add_row("Busy time", _num(rec["busy"]), "")
     for b in rec["buckets"]:
-        t.add_row(f"  processes using {b['label']}", _num(b["points"]), f"{b['processes']} processes")
+        t.add_row(f"  processes each using {b['label']}", _num(b["points"]), f"{b['processes']} processes")
     t.add_row("  processes that exited during the window", _num(rec["exited_processes"]),
               f"{rec['exited_count']} processes")
     t.add_row("  hardware interrupts + DPCs", _num(rec["interrupts"] + rec["dpcs"]), "drivers")
     style_u = "bold red" if rec["unexplained"] >= 3 else ""
     t.add_row(f"[{style_u}]  unexplained[/{style_u}]" if style_u else "  unexplained", _num(rec["unexplained"]), "")
     console.print(t)
+    console.print(f"  [dim]A point is 1% of the whole machine ({w['logical_cpus']} logical CPUs together) over the "
+                  f"window -- the scale of Task Manager's headline. Per-process figures are busy time, "
+                  f"without the speed-scaling uplift.[/dim]")
 
     findings = [f for f in report["findings"] if f["severity"] != "info"]
     if findings:

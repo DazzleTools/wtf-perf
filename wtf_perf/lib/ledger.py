@@ -23,10 +23,10 @@ from .sampler import SampleResult
 
 # Live-process size buckets, in points: (label, lower bound inclusive, upper bound exclusive).
 BUCKETS = (
-    ("5 or more each", 5.0, float("inf")),
-    ("1 to 5 each", 1.0, 5.0),
-    ("0.1 to 1 each", 0.1, 1.0),
-    ("under 0.1 each", 0.0, 0.1),
+    ("5% or more of the machine", 5.0, float("inf")),
+    ("1% to 5% of the machine", 1.0, 5.0),
+    ("0.1% to 1% of the machine", 0.1, 1.0),
+    ("under 0.1% of the machine", 0.0, 0.1),
 )
 
 

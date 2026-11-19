@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.8] - 2026-11-18
+
+### Changed
+- The ledger's size rows say what they measure ("processes each using 5% or more of the machine"), and a line under the table defines a point: 1% of the whole machine, the scale of Task Manager's headline.
+
 ## [0.1.7] - 2026-11-18
 
 ### Added
@@ -53,7 +58,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 - The project's structure, from git-repokit.
 
-[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.7...HEAD
+[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.8...HEAD
+[0.1.8]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.7...v0.1.8
 [0.1.7]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.4...v0.1.5

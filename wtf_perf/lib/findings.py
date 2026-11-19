@@ -66,7 +66,8 @@ def find(ledger: dict, t: dict = THRESHOLDS) -> List[dict]:
         out.append(_f("many_small_consumers", "notable", busy,
                       f"No process stands out: the largest uses {top_proc['points']:.1f} points while "
                       f"{counted} processes share {busy:.1f}.",
-                      [f"{b['processes']} processes using {b['label']}: {b['points']:.1f} points" for b in rec["buckets"]]))
+                      [f"{b['processes']} processes each using {b['label']}: {b['points']:.1f} points together"
+                       for b in rec["buckets"]]))
 
     for rank, fam in enumerate(fams[:3]):
         if fam["points"] >= t["hidden_family_points"] and fam["largest"] > 0 \
