@@ -1,0 +1,73 @@
+[build-system]
+# 77: the PEP 639 license fields (an SPDX `license` string and `license-files`)
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wtf-perf"
+dynamic = ["version"]
+description = "Why is my Windows PC busy? Accounts for every point of CPU: processes, short-lived processes, interrupts and speed scaling"
+readme = "README.md"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+authors = [
+    {name = "Dustin", email = "6962246+djdarcy@users.noreply.github.com"},
+]
+keywords = []
+# No `License ::` classifier: setuptools 77+ refuses one beside a license
+# expression (measured 2026-10-25); the `license` field above says it.
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Utilities",
+]
+
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/DazzleTools/wtf-perf"
+Repository = "https://github.com/DazzleTools/wtf-perf"
+Issues = "https://github.com/DazzleTools/wtf-perf/issues"
+
+[project.scripts]
+wtf-perf = "wtf_perf.cli:main"
+
+[tool.setuptools.dynamic]
+version = {attr = "wtf_perf._version.PIP_VERSION"}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["wtf_perf", "wtf_perf.*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# The package imports from the project root without an install: the vendored
+# pre-push hook runs `python -P -m pytest`, which keeps the root off sys.path,
+# and the first push (`repokit create --github`) comes before any pip install.
+pythonpath = ["."]
+python_files = "test_*.py"
+python_functions = "test_*"
+python_classes = "Test*"
+
+[tool.repokit-common]
+private-branches = ["local", "private", "feature/*", "feat/*", "prototype/*", "experiment/*", "spike/*"]
+languages = ["python"]
+version-source = "wtf_perf/_version.py"
+changelog = "CHANGELOG.md"
+repo-url = "https://github.com/DazzleTools/wtf-perf"
+tag-prefix = "v"
+private-patterns = ["private/", "local/", ".env", "CLAUDE.md", "convos/", "logs/", "revisions/"]
