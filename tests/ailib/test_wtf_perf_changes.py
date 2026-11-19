@@ -50,6 +50,47 @@ def test_entries_carry_a_format_and_writes_leave_no_temp_files(tmp_path):
     assert json.loads(entries[0].read_text(encoding="utf-8"))["format"] == cache.CACHE_FORMAT
 
 
+def test_every_request_field_is_keyed_or_deliberately_not():
+    """A new Request field must be decided: in the cache fingerprint, or left
+    out on purpose. Forgetting it would give two different requests one key."""
+    import dataclasses
+    keyed = {"prompt", "schema", "max_tokens", "temperature"}
+    not_keyed = {"timeout", "stream_to", "workdir", "idle"}   # how to ask, not what is asked
+    fields = {f.name for f in dataclasses.fields(Request)}
+    assert fields == keyed | not_keyed, f"undecided Request fields: {fields - keyed - not_keyed}"
+    base = Request(prompt="p")
+    for name in keyed:
+        changed = dataclasses.replace(base, **{name: {"schema": {"x": 1}, "max_tokens": 9,
+                                                       "temperature": 0.5, "prompt": "q"}[name]})
+        assert changed.fingerprint() != base.fingerprint(), f"{name} is not in the fingerprint"
+
+
+def test_every_response_field_is_cached_or_deliberately_not(tmp_path):
+    """A new Response field must be decided: carried by a cache entry, or
+    rebuilt on a hit. Forgetting it would make it vanish on a cache hit."""
+    import dataclasses
+    stored = {"text", "model_used", "honoured", "elapsed"}
+    rebuilt = {"status", "error", "artifact", "cached", "cached_at", "key"}   # set by run() or meaningless cached
+    fields = {f.name for f in dataclasses.fields(Response)}
+    assert fields == stored | rebuilt, f"undecided Response fields: {fields - stored - rebuilt}"
+    cache.run(_Stub(), Request(prompt="p"), cache_dir=tmp_path)
+    entry = json.loads(next(tmp_path.iterdir()).read_text(encoding="utf-8"))["response"]
+    assert set(entry) == stored
+
+
+def test_windows_lookup_prefers_a_runnable_extension_over_a_posix_shim(tmp_path, monkeypatch):
+    """A bare `tool` shim sits on PATH beside `tool.cmd`: the lookup must
+    return the .cmd, which Windows can run (the WinError 193 defect)."""
+    import sys
+    from wtf_perf._vendor.ailib.transports import cli as cli_mod
+    (tmp_path / "tool").write_text("#!/bin/sh\n", encoding="utf-8")
+    (tmp_path / "tool.cmd").write_text("@echo off\n", encoding="utf-8")
+    monkeypatch.setenv("PATH", str(tmp_path))
+    monkeypatch.setenv("PATHEXT", ".EXE;.CMD")
+    monkeypatch.setattr(sys, "platform", "win32")
+    assert cli_mod.find_exe("tool").lower().endswith("tool.cmd")
+
+
 def test_an_entry_without_a_format_still_reads(tmp_path):
     stub = _Stub()
     first = cache.run(stub, Request(prompt="p"), cache_dir=tmp_path)

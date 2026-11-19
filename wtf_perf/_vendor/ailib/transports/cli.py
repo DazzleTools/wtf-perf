@@ -65,6 +65,26 @@ class _Stopped(Exception):
     """The child was killed by this transport, and the sentence says why."""
 
 
+def _which_pathext(name: str) -> str | None:
+    """What Windows CreateProcess would run for a bare `name`: each PATH
+    directory in order, trying the PATHEXT extensions. shutil.which can
+    return an extension-less file first (a POSIX shell shim on PATH), which
+    Windows cannot execute -- WinError 193, measured 2026-11-18 with a
+    `claude` shim beside `claude.cmd`. A name that already has an extension
+    is left to shutil.which."""
+    if Path(name).suffix:
+        return None
+    exts = [e for e in os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD").split(";") if e]
+    for d in os.environ.get("PATH", "").split(os.pathsep):
+        if not d:
+            continue
+        for e in exts:
+            p = Path(d) / (name + e.lower())
+            if p.is_file():
+                return str(p)
+    return None
+
+
 def find_exe(name: str, candidates: tuple[str, ...] = ()) -> str | None:
     """The executable to run: `name` if it is a path that exists, else PATH
     (with the `.exe` / `.cmd` variants `shutil.which` knows), else the first
@@ -74,7 +94,7 @@ def find_exe(name: str, candidates: tuple[str, ...] = ()) -> str | None:
     p = Path(name).expanduser()
     if p.is_file():
         return str(p)
-    hit = shutil.which(name) or (sys.platform == "win32" and (shutil.which(name + ".exe") or shutil.which(name + ".cmd")))
+    hit = (_which_pathext(name) if sys.platform == "win32" else None) or shutil.which(name)
     if hit:
         return str(hit)
     for c in candidates:
