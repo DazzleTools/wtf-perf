@@ -66,6 +66,29 @@ def render_tier0(console: Console, report: dict, ai_fetcher: Optional[Callable[[
         ai_fetcher()
 
 
+def render_ai(console: Console, result: dict) -> None:
+    """The AI summary panel, or one line saying why there is none."""
+    for w in result.get("warnings", []):
+        console.print(f"  [yellow]AI note:[/yellow] {w}")
+    if not result.get("success"):
+        console.print(f"  [dim]{result.get('error')}[/dim]")
+        return
+    s = result.get("sections", {})
+    if "raw" in s and len(s) == 1:
+        body = s["raw"]
+    else:
+        conf = s.get("confidence", "")
+        cstyle = "green" if conf.lower().startswith("high") else "red" if conf.lower().startswith("low") else "yellow"
+        body = "\n\n".join(filter(None, [
+            f"[bold]What happened[/bold]\n{s.get('what_happened', '')}",
+            f"[bold]Why[/bold]\n{s.get('why', '')}",
+            f"[bold]What to do[/bold]\n{s.get('what_to_do', '')}",
+            f"[bold]Confidence[/bold] [{cstyle}]{conf}[/{cstyle}]" if conf else "",
+        ]))
+    title = f"AI summary ({result.get('backend')}" + (f", {result['model_used']}" if result.get("model_used") else "") + ")"
+    console.print(Panel(body, title=title, border_style="bright_blue"))
+
+
 def render_tier1(console: Console, report: dict, top: int = 12) -> None:
     t = Table(title="Applications (process families)")
     for col, j in (("Family", "left"), ("Points", "right"), ("Processes", "right"), ("Largest one", "right"),

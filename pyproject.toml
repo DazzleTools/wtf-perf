@@ -66,6 +66,9 @@ wtf_perf = [
     # `*` glob skips dotfiles, so `tools/**/*` above silently drops them and the
     # installed CLI finds no tools -- list them explicitly so the wheel includes them.
     "tools/**/.wtf-perf.json",
+    # The vendored AI library's record: its origin, licence line and changes
+    # must travel with the tree in the wheel.
+    "_vendor/ailib/_VENDORED.md",
 ]
 
 [tool.pytest.ini_options]

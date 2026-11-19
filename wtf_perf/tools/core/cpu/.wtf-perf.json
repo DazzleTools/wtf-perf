@@ -15,7 +15,7 @@
         "event_logs": [],
         "required_privileges": "user",
         "supports_history": false,
-        "supports_ai": false
+        "supports_ai": true
     },
-    "notes": "Read-only. Samples the kernel process table (no WMI). supports_ai turns true when the AI unit ships."
+    "notes": "Read-only. Samples the kernel process table (no WMI). --ai adds a summary from a local AI CLI or local model server (names only unless --ai-detail full)."
 }

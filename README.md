@@ -34,10 +34,13 @@ wtf-perf list            # the available tools
 wtf-perf                 # same as: wtf-perf cpu
 wtf-perf cpu -s 15       # sample 15 s and account for every point of the CPU headline
 wtf-perf cpu --json      # the same report as JSON
+wtf-perf cpu --ai        # add an AI summary (claude by default; also codex, lmstudio, ollama, prompt-only)
 python -m wtf_perf --version
 ```
 
 wtf-perf is part of the wtf-windows family of diagnostics and is built on dazzlecmd-lib, so each drill-down is a tool under one command.
+
+The AI summary sends process names and figures to the backend you choose -- never command lines unless you ask for them with `--ai-detail full` (with a warning when the backend runs off your machine). The agent CLIs run with no tools and one turn. `--ai-save` keeps your `--ai` backend and `--ai-detail` choice for later runs (in `~/.wtf-perf/config.json`). Without elevation, command lines of other users' and protected processes are reported as unavailable; everything else works the same.
 
 ## Development
 

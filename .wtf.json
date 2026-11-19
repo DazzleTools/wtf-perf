@@ -1,6 +1,6 @@
 {
     "name": "perf",
-    "version": "0.1.7",
+    "version": "0.1.9",
     "description": "Why is my Windows PC busy? Accounts for every point of the CPU headline.",
     "namespace": "core",
     "language": "python",
@@ -23,7 +23,7 @@
         "required_privileges": "user",
         "ps1_scripts": [],
         "supports_history": false,
-        "supports_ai": false
+        "supports_ai": true
     },
     "source": {
         "url": "https://github.com/DazzleTools/wtf-perf.git"

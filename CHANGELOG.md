@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.9] - 2026-11-18
+
+### Added
+- `--ai [BACKEND]` adds a four-part AI summary (what happened, why, what to do, confidence) to `wtf-perf cpu`, from claude, codex, a local LM Studio or Ollama server, or `prompt-only` (saves the prompt to a file). `--ai-only` shows just the summary; `--ai-verbose` streams it; `--ai-model` picks a model (required for Ollama).
+- Process names and figures only by default; `--ai-detail full` adds the top processes' command lines, with a warning when the backend runs off the machine. `--ai-save` keeps the chosen backend and detail level.
+- The agent CLIs run with no tools and a single turn: the summary is built from strings other programs chose, and the CLI gets nothing to act on.
+
 ## [0.1.8] - 2026-11-18
 
 ### Changed
@@ -58,7 +65,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 - The project's structure, from git-repokit.
 
-[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.8...HEAD
+[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.9...HEAD
+[0.1.9]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.8...v0.1.9
 [0.1.8]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.7...v0.1.8
 [0.1.7]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.5...v0.1.6
