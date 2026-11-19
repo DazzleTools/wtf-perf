@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.15] - 2026-11-18
+
+### Changed
+- Local model servers addressed as `localhost` are reached through `127.0.0.1`, avoiding a measured two-second delay per request on Windows.
+- The vendored AI library now reports a local model's reasoning text and why it stopped (`finish_reason`) alongside its answer.
+
 ## [0.1.14] - 2026-11-18
 
 ### Fixed
@@ -90,7 +96,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 - The project's structure, from git-repokit.
 
-[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.14...HEAD
+[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.15...HEAD
+[0.1.15]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.14...v0.1.15
 [0.1.14]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.13...v0.1.14
 [0.1.13]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.12...v0.1.13
 [0.1.12]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.11...v0.1.12

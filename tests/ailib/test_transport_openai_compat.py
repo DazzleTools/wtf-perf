@@ -64,6 +64,8 @@ class _Fake:
     sent: dict | None = None
     seen_auth: str | None = None
     requests: int = 0
+    message_extra: dict = {}           # wtf-perf: e.g. reasoning_content
+    finish: str = ""                   # wtf-perf: choices[0].finish_reason
 
 
 class _Handler(BaseHTTPRequestHandler):
@@ -107,7 +109,8 @@ class _Handler(BaseHTTPRequestHandler):
         if _Fake.status != 200:
             return self._json({"error": {"message": "response_format not supported"}}, _Fake.status)
         self._json({"model": _Fake.sent.get("model"),
-                    "choices": [{"message": {"content": _Fake.content}}]})
+                    "choices": [{"message": {"content": _Fake.content, **_Fake.message_extra},
+                                 **({"finish_reason": _Fake.finish} if _Fake.finish else {})}]})
 
 
 @pytest.fixture
@@ -123,6 +126,8 @@ def server():
     _Fake.sent = None
     _Fake.seen_auth = None
     _Fake.requests = 0
+    _Fake.message_extra = {}
+    _Fake.finish = ""
     srv = HTTPServer(("127.0.0.1", 0), _Handler)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     srv.url = f"http://127.0.0.1:{srv.server_port}/v1"
@@ -584,3 +589,16 @@ def test_two_backends_stay_independent_across_alternating_probes_and_an_invoke(s
 def test_capabilities_of_the_openai_compat_transport(server):
     caps = build(_spec(server.url, model="m")).capabilities
     assert {"schema", "model"} <= caps and "stream" not in caps
+
+
+def test_reasoning_and_finish_reason_come_back_when_the_server_sends_them(server):
+    """wtf-perf's copy: the shape LM Studio sends (measured 2026-11-18)."""
+    _Fake.message_extra = {"reasoning_content": "thinking about it"}
+    _Fake.finish = "stop"
+    r = _ask(build(_spec(server.url)))
+    assert r.ok and r.reasoning == "thinking about it" and r.finish_reason == "stop"
+
+
+def test_without_them_both_are_empty(server):
+    r = _ask(build(_spec(server.url)))
+    assert r.ok and r.reasoning == "" and r.finish_reason == ""

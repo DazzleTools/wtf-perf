@@ -57,6 +57,7 @@ from __future__ import annotations
 
 import ipaddress
 import json
+import re
 import os
 import stat
 import time
@@ -151,6 +152,15 @@ def endpoint_is_on_prem(url: str) -> bool | None:
     return bool(ip.is_loopback or ip.is_private or ip.is_link_local)
 
 
+
+def connectable(url: str) -> str:
+    """`localhost` -> `127.0.0.1`, at connect time only. LM Studio binds IPv4
+    only on Windows and `localhost` resolves to ::1 first: measured
+    2026-11-18 at ~2 s per request against an IPv4-only server (127.0.0.1:
+    0.002-0.02 s). The spec's endpoint -- and so the backend's identity and
+    cache keys -- is left exactly as the caller wrote it."""
+    return re.sub(r"^(https?://)localhost(?=[:/]|$)", r"\g<1>127.0.0.1", url, flags=re.IGNORECASE)
+
 class OpenAICompatible:
     """Stateless: every method takes the spec it is working for."""
 
@@ -207,7 +217,7 @@ class OpenAICompatible:
         return h
 
     def _get(self, spec: Spec, url: str, timeout: int = PROBE_TIMEOUT):
-        req = urllib.request.Request(url, headers=self._headers(spec))
+        req = urllib.request.Request(connectable(url), headers=self._headers(spec))
         with urllib.request.urlopen(req, timeout=timeout) as r:      # noqa: S310
             return json.loads(r.read().decode("utf-8", "replace"))
 
@@ -348,7 +358,7 @@ class OpenAICompatible:
                                        "json_schema": {"name": "answer", "strict": True,
                                                        "schema": req.schema}}
             honoured.append(SCHEMA)
-        http = urllib.request.Request(ep + "/chat/completions", data=json.dumps(body).encode("utf-8"),
+        http = urllib.request.Request(connectable(ep) + "/chat/completions", data=json.dumps(body).encode("utf-8"),
                                       headers=self._headers(spec, post=True), method="POST")
         started = time.monotonic()
         # Until this transport streams (the run-while-alive design's second
@@ -378,10 +388,13 @@ class OpenAICompatible:
         choices = answer.get("choices") if isinstance(answer, dict) else None
         if not choices:
             return Response("failed", error=f"{ep} answered with no choices", elapsed=elapsed)
-        text = (choices[0].get("message") or {}).get("content") or ""
+        message = choices[0].get("message") or {}
+        text = message.get("content") or ""
+        reasoning = str(message.get("reasoning_content") or message.get("reasoning") or "")
+        finish = str(choices[0].get("finish_reason") or "")
         if not text.strip():
-            return Response("failed", model_used=model, elapsed=elapsed,
+            return Response("failed", model_used=model, elapsed=elapsed, reasoning=reasoning, finish_reason=finish,
                             error=(f"{model} answered with empty content -- the reasoning budget may "
                                    f"have consumed the reply; raise max_tokens or turn reasoning off"))
         return Response("answered", text=text, model_used=str(answer.get("model") or model),
-                        honoured=tuple(honoured), elapsed=elapsed)
+                        honoured=tuple(honoured), elapsed=elapsed, reasoning=reasoning, finish_reason=finish)

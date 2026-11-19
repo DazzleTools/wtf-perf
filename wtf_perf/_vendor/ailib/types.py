@@ -202,6 +202,12 @@ class Response:
     cached_at: float = 0.0
     key: str = ""
     elapsed: float = 0.0
+    # Optional, filled by transports that can see them (openai_compat reads
+    # message.reasoning_content / reasoning and choices[0].finish_reason --
+    # measured on LM Studio 2026-11-18). "" when unknown. Not cached: a hit
+    # returns "" for both.
+    reasoning: str = ""
+    finish_reason: str = ""
 
     def __post_init__(self) -> None:
         if self.status not in STATUSES:

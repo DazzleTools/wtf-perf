@@ -70,7 +70,8 @@ def test_every_response_field_is_cached_or_deliberately_not(tmp_path):
     rebuilt on a hit. Forgetting it would make it vanish on a cache hit."""
     import dataclasses
     stored = {"text", "model_used", "honoured", "elapsed"}
-    rebuilt = {"status", "error", "artifact", "cached", "cached_at", "key"}   # set by run() or meaningless cached
+    rebuilt = {"status", "error", "artifact", "cached", "cached_at", "key",   # set by run() or meaningless cached
+               "reasoning", "finish_reason"}                                  # deliberately not cached
     fields = {f.name for f in dataclasses.fields(Response)}
     assert fields == stored | rebuilt, f"undecided Response fields: {fields - stored - rebuilt}"
     cache.run(_Stub(), Request(prompt="p"), cache_dir=tmp_path)
@@ -134,3 +135,11 @@ def test_an_entry_without_a_format_still_reads(tmp_path):
     path.write_text(json.dumps(body), encoding="utf-8")
     again = cache.run(stub, Request(prompt="p"), cache_dir=tmp_path)
     assert again.cached and again.text == first.text and stub.calls == 1
+
+
+def test_localhost_is_rewritten_to_ipv4_at_connect_time_only():
+    from wtf_perf._vendor.ailib.transports.openai_compat import connectable
+    assert connectable("http://localhost:1234/v1") == "http://127.0.0.1:1234/v1"
+    assert connectable("http://LOCALHOST/v1") == "http://127.0.0.1/v1"
+    assert connectable("http://localhostile.example/v1") == "http://localhostile.example/v1"
+    assert connectable("https://api.example.com/v1") == "https://api.example.com/v1"
