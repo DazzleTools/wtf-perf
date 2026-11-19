@@ -1,0 +1,15 @@
+{
+  "test_command": ["python", "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests/test_sampler.py"],
+  "mutations": [
+    {"id": "T1", "file": "wtf_perf/lib/sampler.py", "original": "_OFF_TIMES = 24", "mutated": "_OFF_TIMES = 32", "note": "times read 8 bytes late"},
+    {"id": "T2", "file": "wtf_perf/lib/sampler.py", "original": "(name_len,) = struct.unpack_from(\"<H\"", "mutated": "(name_len,) = struct.unpack_from(\"<I\"", "note": "name length read as ULONG"},
+    {"id": "T3", "file": "wtf_perf/lib/sampler.py", "original": "_OFF_PIDS = 80", "mutated": "_OFF_PIDS = 88", "note": "pid read from the parent field"},
+    {"id": "T4", "file": "wtf_perf/lib/sampler.py", "original": "handles, session = struct.unpack_from", "mutated": "session, handles = struct.unpack_from", "note": "handles and session swapped"},
+    {"id": "T5", "file": "wtf_perf/lib/sampler.py", "original": "rd, wr, ot, rdb, wrb, otb = struct.unpack_from", "mutated": "wr, rd, ot, rdb, wrb, otb = struct.unpack_from", "note": "read and write counts swapped"},
+    {"id": "T6", "file": "wtf_perf/lib/sampler.py", "original": "wr=rec.wr - base[\"wr\"]", "mutated": "wr=rec.wr - base[\"rd\"]", "note": "write delta subtracts the read baseline"},
+    {"id": "T7", "file": "wtf_perf/lib/sampler.py", "original": "cpu=(rec.user - base[\"user\"]) + (rec.kernel - base[\"kernel\"]),", "mutated": "cpu=(rec.kernel - base[\"kernel\"]),", "note": "cpu delta omits user time"},
+    {"id": "T8", "file": "wtf_perf/lib/sampler.py", "original": "idle += i_; kernel += k; user += u;", "mutated": "idle += i_; kernel += u; user += k;", "note": "per-CPU kernel and user swapped"},
+    {"id": "T9", "file": "wtf_perf/lib/sampler.py", "original": "* 1e7", "mutated": "* 1e6", "note": "capacity off by 10x"},
+    {"id": "T10", "file": "wtf_perf/lib/sampler.py", "original": "cycles=rec.cycle - base[\"cycle\"]", "mutated": "cycles=rec.cycle", "note": "cycles not a delta"}
+  ]
+}

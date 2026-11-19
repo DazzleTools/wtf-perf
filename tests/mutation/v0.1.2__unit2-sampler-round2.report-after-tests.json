@@ -1,0 +1,263 @@
+{
+  "harness": {
+    "name": "mutation_sweep.py",
+    "version": "0.2.0"
+  },
+  "environment": {
+    "python": "3.12.0",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "root": ".",
+    "test_command": [
+      "python",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "tests/test_sampler.py"
+    ],
+    "timestamp": "2026-11-18T20:19:00-05:00"
+  },
+  "results": [
+    {
+      "id": "T1",
+      "file": "wtf_perf/lib/sampler.py",
+      "note": "times read 8 bytes late",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": "   def test_parse_reads_a_name_that_ends_exactly_at_the_buffer_end():\n        \"\"\"The last name need not be followed by a terminator to be read.\"\"\"\n        data = _pack_processes([dict(pid=9, ppid=4, create=3, name=\"tail.exe\")])\n        assert data.endswith(b\"\\0\\0\")\n>       assert parse_process_buffer(data[:-2], BASE)[(9, 3)].name == \"tail.exe\"\nE       KeyError: (9, 3)\n\ntests\\test_sampler.py:82: KeyError\n________ test_parse_treats_a_name_pointer_with_zero_length_as_unknown _________\n\n    def test_parse_treats_a_name_pointer_with_zero_length_as_unknown():\n        data = bytearray(_pack_processes([dict(pid=8, ppid=4, create=1, name=\"x.exe\")]))\n        struct.pack_into(\"<H\", data, 56, 0)\n>       assert parse_process_buffer(bytes(data), BASE)[(8, 1)].name == \"?\"\nE       KeyError: (8, 1)\n\ntests\\test_sampler.py:88: KeyError\n=========================== short test summary info ===========================\nFAILED tests/test_sampler.py::test_parse_reads_every_field_of_every_entry - a...\nFAILED tests/test_sampler.py::test_parse_marks_a_name_pointing_outside_the_buffer_as_unknown\nFAILED tests/test_sampler.py::test_parse_reads_an_entry_that_ends_exactly_at_the_buffer_end\nFAILED tests/test_sampler.py::test_parse_reads_a_name_that_ends_exactly_at_the_buffer_end\nFAILED tests/test_sampler.py::test_parse_treats_a_name_pointer_with_zero_length_as_unknown\n5 failed, 9 passed in 0.14s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_sampler.py::test_parse_marks_a_name_pointing_outside_the_buffer_as_unknown",
+        "tests/test_sampler.py::test_parse_reads_a_name_that_ends_exactly_at_the_buffer_end",
+        "tests/test_sampler.py::test_parse_reads_an_entry_that_ends_exactly_at_the_buffer_end",
+        "tests/test_sampler.py::test_parse_reads_every_field_of_every_entry",
+        "tests/test_sampler.py::test_parse_treats_a_name_pointer_with_zero_length_as_unknown"
+      ]
+    },
+    {
+      "id": "T2",
+      "file": "wtf_perf/lib/sampler.py",
+      "note": "name length read as ULONG",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": "e_process_buffer(data, BASE)\n        assert set(procs) == {(0, 0), (4242, 1234567)}\n        idle = procs[(0, 0)]\n        assert idle.name == IDLE_PROCESS_NAME and idle.kernel == 999\n        p = procs[(4242, 1234567)]\n>       assert (p.name, p.ppid, p.threads, p.handles, p.session) == (\"claude.exe\", 1000, 7, 321, 1)\nE       AssertionError: assert ('?', 1000, 7, 321, 1) == ('claude.exe'...00, 7, 321, 1)\nE         \nE         At index 0 diff: '?' != 'claude.exe'\nE         Use -v to get more diff\n\ntests\\test_sampler.py:60: AssertionError\n_________ test_parse_reads_a_name_that_ends_exactly_at_the_buffer_end _________\n\n    def test_parse_reads_a_name_that_ends_exactly_at_the_buffer_end():\n        \"\"\"The last name need not be followed by a terminator to be read.\"\"\"\n        data = _pack_processes([dict(pid=9, ppid=4, create=3, name=\"tail.exe\")])\n        assert data.endswith(b\"\\0\\0\")\n>       assert parse_process_buffer(data[:-2], BASE)[(9, 3)].name == \"tail.exe\"\nE       AssertionError: assert '?' == 'tail.exe'\nE         \nE         - tail.exe\nE         + ?\n\ntests\\test_sampler.py:82: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_sampler.py::test_parse_reads_every_field_of_every_entry - A...\nFAILED tests/test_sampler.py::test_parse_reads_a_name_that_ends_exactly_at_the_buffer_end\n2 failed, 12 passed in 2.25s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_sampler.py::test_parse_reads_a_name_that_ends_exactly_at_the_buffer_end",
+        "tests/test_sampler.py::test_parse_reads_every_field_of_every_entry"
+      ]
+    },
+    {
+      "id": "T3",
+      "file": "wtf_perf/lib/sampler.py",
+      "note": "pid read from the parent field",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": ", 1)].name == \"?\"\nE       KeyError: (8, 1)\n\ntests\\test_sampler.py:88: KeyError\n__________ test_live_snapshot_sees_this_process_and_every_processor ___________\n\n    @pytest.mark.skipif(sys.platform != \"win32\", reason=\"reads the Windows kernel process table\")\n    def test_live_snapshot_sees_this_process_and_every_processor():\n        \"\"\"Read-only, one call each: this process is in the table under its own\n        name, and the processor totals cover every logical processor.\"\"\"\n        from wtf_perf.lib.sampler import NtSource\n    \n        src = NtSource()\n        _, procs = src.processes()\n        mine = [r for r in procs.values() if r.pid == os.getpid()]\n>       assert len(mine) == 1 and mine[0].name.lower().startswith(\"python\")\nE       assert (0 == 1)\nE        +  where 0 = len([])\n\ntests\\test_sampler.py:205: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_sampler.py::test_parse_reads_every_field_of_every_entry - a...\nFAILED tests/test_sampler.py::test_parse_marks_a_name_pointing_outside_the_buffer_as_unknown\nFAILED tests/test_sampler.py::test_parse_reads_a_name_that_ends_exactly_at_the_buffer_end\nFAILED tests/test_sampler.py::test_parse_treats_a_name_pointer_with_zero_length_as_unknown\nFAILED tests/test_sampler.py::test_live_snapshot_sees_this_process_and_every_processor\n5 failed, 9 passed in 0.14s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_sampler.py::test_live_snapshot_sees_this_process_and_every_processor",
+        "tests/test_sampler.py::test_parse_marks_a_name_pointing_outside_the_buffer_as_unknown",
+        "tests/test_sampler.py::test_parse_reads_a_name_that_ends_exactly_at_the_buffer_end",
+        "tests/test_sampler.py::test_parse_reads_every_field_of_every_entry",
+        "tests/test_sampler.py::test_parse_treats_a_name_pointer_with_zero_length_as_unknown"
+      ]
+    },
+    {
+      "id": "T4",
+      "file": "wtf_perf/lib/sampler.py",
+      "note": "handles and session swapped",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": "F.............                                                           [100%]\n================================== FAILURES ===================================\n_________________ test_parse_reads_every_field_of_every_entry _________________\n\n    def test_parse_reads_every_field_of_every_entry():\n        data = _pack_processes([\n            dict(pid=0, ppid=0, create=0, name=None, kernel=999),\n            dict(pid=4242, ppid=1000, create=1234567, name=\"claude.exe\", threads=7, handles=321, session=1,\n                 cycle=55, user=10, kernel=20, rd=1, wr=2, ot=3, rdb=4, wrb=5, otb=6),\n        ])\n        procs = parse_process_buffer(data, BASE)\n        assert set(procs) == {(0, 0), (4242, 1234567)}\n        idle = procs[(0, 0)]\n        assert idle.name == IDLE_PROCESS_NAME and idle.kernel == 999\n        p = procs[(4242, 1234567)]\n>       assert (p.name, p.ppid, p.threads, p.handles, p.session) == (\"claude.exe\", 1000, 7, 321, 1)\nE       AssertionError: assert ('claude.exe'...00, 7, 1, 321) == ('claude.exe'...00, 7, 321, 1)\nE         \nE         At index 3 diff: 1 != 321\nE         Use -v to get more diff\n\ntests\\test_sampler.py:60: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_sampler.py::test_parse_reads_every_field_of_every_entry - A...\n1 failed, 13 passed in 0.14s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_sampler.py::test_parse_reads_every_field_of_every_entry"
+      ]
+    },
+    {
+      "id": "T5",
+      "file": "wtf_perf/lib/sampler.py",
+      "note": "read and write counts swapped",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": "                [100%]\n================================== FAILURES ===================================\n_________________ test_parse_reads_every_field_of_every_entry _________________\n\n    def test_parse_reads_every_field_of_every_entry():\n        data = _pack_processes([\n            dict(pid=0, ppid=0, create=0, name=None, kernel=999),\n            dict(pid=4242, ppid=1000, create=1234567, name=\"claude.exe\", threads=7, handles=321, session=1,\n                 cycle=55, user=10, kernel=20, rd=1, wr=2, ot=3, rdb=4, wrb=5, otb=6),\n        ])\n        procs = parse_process_buffer(data, BASE)\n        assert set(procs) == {(0, 0), (4242, 1234567)}\n        idle = procs[(0, 0)]\n        assert idle.name == IDLE_PROCESS_NAME and idle.kernel == 999\n        p = procs[(4242, 1234567)]\n        assert (p.name, p.ppid, p.threads, p.handles, p.session) == (\"claude.exe\", 1000, 7, 321, 1)\n        assert (p.cycle, p.user, p.kernel) == (55, 10, 20)\n>       assert (p.rd, p.wr, p.ot, p.rdb, p.wrb, p.otb) == (1, 2, 3, 4, 5, 6)\nE       assert (2, 1, 3, 4, 5, 6) == (1, 2, 3, 4, 5, 6)\nE         \nE         At index 0 diff: 2 != 1\nE         Use -v to get more diff\n\ntests\\test_sampler.py:62: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_sampler.py::test_parse_reads_every_field_of_every_entry - a...\n1 failed, 13 passed in 0.13s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_sampler.py::test_parse_reads_every_field_of_every_entry"
+      ]
+    },
+    {
+      "id": "T6",
+      "file": "wtf_perf/lib/sampler.py",
+      "note": "write delta subtracts the read baseline",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": "........F.....                                                           [100%]\n================================== FAILURES ===================================\n____________ test_io_counts_and_cycles_are_deltas_over_the_window _____________\n\n    def test_io_counts_and_cycles_are_deltas_over_the_window():\n        src = ScriptedSource([\n            [_rec(5, 1, \"io.exe\", rd=10, wr=4, ot=1000, rdb=100, wrb=40, cycle=5_000)],\n            [_rec(5, 1, \"io.exe\", rd=15, wr=6, ot=1600, rdb=150, wrb=90, cycle=7_500)],\n        ])\n        d = _by_pid(sample(1, interval=1, source=src, sleep=_no_sleep, self_pid=-1))[(5, 1)]\n>       assert (d.rd, d.wr, d.ot, d.rdb, d.wrb) == (5, 2, 600, 50, 50)\nE       assert (5, -4, 600, 50, 50) == (5, 2, 600, 50, 50)\nE         \nE         At index 1 diff: -4 != 2\nE         Use -v to get more diff\n\ntests\\test_sampler.py:161: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_sampler.py::test_io_counts_and_cycles_are_deltas_over_the_window\n1 failed, 13 passed in 0.14s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_sampler.py::test_io_counts_and_cycles_are_deltas_over_the_window"
+      ]
+    },
+    {
+      "id": "T7",
+      "file": "wtf_perf/lib/sampler.py",
+      "note": "cpu delta omits user time",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": "c = ScriptedSource([\n            [_rec(77, 1, \"python.exe\", user=10), _rec(5, 1, \"other.exe\", user=10)],\n            [_rec(77, 1, \"python.exe\", user=25), _rec(5, 1, \"other.exe\", user=90)],\n        ])\n>       assert sample(1, interval=1, source=src, sleep=_no_sleep, self_pid=77).self_cpu == 15\nE       assert 0 == 15\nE        +  where 0 = SampleResult(seconds=1.0, polls=1, interval=1, cpu_before=CpuTotals(idle=0, kernel=0, user=0, dpc=0, intr=0, icount=0,...b=0, wrb=0, otb=0), cpu=0, kernel=0, cycles=0, rd=0, wr=0, ot=0, rdb=0, wrb=0, born=False, exited=False)], self_pid=77).self_cpu\nE        +    where SampleResult(seconds=1.0, polls=1, interval=1, cpu_before=CpuTotals(idle=0, kernel=0, user=0, dpc=0, intr=0, icount=0,...b=0, wrb=0, otb=0), cpu=0, kernel=0, cycles=0, rd=0, wr=0, ot=0, rdb=0, wrb=0, born=False, exited=False)], self_pid=77) = sample(1, interval=1, source=<test_sampler.ScriptedSource object at 0x0000022FEEC63920>, sleep=_no_sleep, self_pid=77)\n\ntests\\test_sampler.py:170: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_sampler.py::test_a_process_born_and_exited_inside_the_window_counts_all_its_time\nFAILED tests/test_sampler.py::test_a_reused_process_id_is_two_records - Asser...\nFAILED tests/test_sampler.py::test_the_tools_own_cost_is_reported - assert 0 ...\n3 failed, 11 passed in 0.15s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_sampler.py::test_a_process_born_and_exited_inside_the_window_counts_all_its_time",
+        "tests/test_sampler.py::test_a_reused_process_id_is_two_records",
+        "tests/test_sampler.py::test_the_tools_own_cost_is_reported"
+      ]
+    },
+    {
+      "id": "T8",
+      "file": "wtf_perf/lib/sampler.py",
+      "note": "per-CPU kernel and user swapped",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": ".....F........                                                           [100%]\n================================== FAILURES ===================================\n_________________ test_parse_cpu_buffer_sums_every_processor __________________\n\n    def test_parse_cpu_buffer_sums_every_processor():\n        data = b\"\".join(struct.pack(\"<5qI4x\", 100, 300, 50, 2, 3, 9) for _ in range(4))\n        t = parse_cpu_buffer(data)\n>       assert (t.idle, t.kernel, t.user, t.dpc, t.intr, t.icount, t.ncpu) == (400, 1200, 200, 8, 12, 36, 4)\nE       assert (400, 200, 12..., 12, 36, ...) == (400, 1200, 2..., 12, 36, ...)\nE         \nE         At index 1 diff: 200 != 1200\nE         Use -v to get more diff\n\ntests\\test_sampler.py:94: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_sampler.py::test_parse_cpu_buffer_sums_every_processor - as...\n1 failed, 13 passed in 0.13s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_sampler.py::test_parse_cpu_buffer_sums_every_processor"
+      ]
+    },
+    {
+      "id": "T9",
+      "file": "wtf_perf/lib/sampler.py",
+      "note": "capacity off by 10x",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": "..........F...                                                           [100%]\n================================== FAILURES ===================================\n___________ test_window_length_and_capacity_come_from_the_snapshots ___________\n\n    def test_window_length_and_capacity_come_from_the_snapshots():\n        src = ScriptedSource([[_rec(1, 1, \"a\")]] * 4, cpus=(CpuTotals(ncpu=16), CpuTotals(ncpu=16)))\n        r = sample(3, interval=1, source=src, sleep=_no_sleep, self_pid=-1)\n        assert r.seconds == 3.0 and r.polls == 3\n>       assert r.capacity == 3 * 16 * 1e7\nE       assert 48000000.0 == ((3 * 16) * 10000000.0)\nE        +  where 48000000.0 = SampleResult(seconds=3.0, polls=3, interval=1, cpu_before=CpuTotals(idle=0, kernel=0, user=0, dpc=0, intr=0, icount=0,...b=0, wrb=0, otb=0), cpu=0, kernel=0, cycles=0, rd=0, wr=0, ot=0, rdb=0, wrb=0, born=False, exited=False)], self_pid=-1).capacity\n\ntests\\test_sampler.py:177: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_sampler.py::test_window_length_and_capacity_come_from_the_snapshots\n1 failed, 13 passed in 0.12s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_sampler.py::test_window_length_and_capacity_come_from_the_snapshots"
+      ]
+    },
+    {
+      "id": "T10",
+      "file": "wtf_perf/lib/sampler.py",
+      "note": "cycles not a delta",
+      "verdict": "killed",
+      "restore_ok": true,
+      "output_tail": "........F.....                                                           [100%]\n================================== FAILURES ===================================\n____________ test_io_counts_and_cycles_are_deltas_over_the_window _____________\n\n    def test_io_counts_and_cycles_are_deltas_over_the_window():\n        src = ScriptedSource([\n            [_rec(5, 1, \"io.exe\", rd=10, wr=4, ot=1000, rdb=100, wrb=40, cycle=5_000)],\n            [_rec(5, 1, \"io.exe\", rd=15, wr=6, ot=1600, rdb=150, wrb=90, cycle=7_500)],\n        ])\n        d = _by_pid(sample(1, interval=1, source=src, sleep=_no_sleep, self_pid=-1))[(5, 1)]\n        assert (d.rd, d.wr, d.ot, d.rdb, d.wrb) == (5, 2, 600, 50, 50)\n>       assert d.cycles == 2_500\nE       AssertionError: assert 7500 == 2500\nE        +  where 7500 = ProcDelta(record=ProcRecord(pid=5, ppid=1, create=1, name='io.exe', threads=0, handles=0, session=0, cycle=7500, user=...0, rdb=150, wrb=90, otb=0), cpu=0, kernel=0, cycles=7500, rd=5, wr=2, ot=600, rdb=50, wrb=50, born=False, exited=False).cycles\n\ntests\\test_sampler.py:162: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_sampler.py::test_io_counts_and_cycles_are_deltas_over_the_window\n1 failed, 13 passed in 0.12s\nC:\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:211: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "killed_by": [
+        "tests/test_sampler.py::test_io_counts_and_cycles_are_deltas_over_the_window"
+      ]
+    }
+  ],
+  "summary": {
+    "killed": 10
+  },
+  "anomalies": [],
+  "overlap": {
+    "kills": {
+      "tests/test_sampler.py::test_a_process_born_and_exited_inside_the_window_counts_all_its_time": [
+        "T7"
+      ],
+      "tests/test_sampler.py::test_a_reused_process_id_is_two_records": [
+        "T7"
+      ],
+      "tests/test_sampler.py::test_io_counts_and_cycles_are_deltas_over_the_window": [
+        "T10",
+        "T6"
+      ],
+      "tests/test_sampler.py::test_live_snapshot_sees_this_process_and_every_processor": [
+        "T3"
+      ],
+      "tests/test_sampler.py::test_parse_cpu_buffer_sums_every_processor": [
+        "T8"
+      ],
+      "tests/test_sampler.py::test_parse_marks_a_name_pointing_outside_the_buffer_as_unknown": [
+        "T1",
+        "T3"
+      ],
+      "tests/test_sampler.py::test_parse_reads_a_name_that_ends_exactly_at_the_buffer_end": [
+        "T1",
+        "T2",
+        "T3"
+      ],
+      "tests/test_sampler.py::test_parse_reads_an_entry_that_ends_exactly_at_the_buffer_end": [
+        "T1"
+      ],
+      "tests/test_sampler.py::test_parse_reads_every_field_of_every_entry": [
+        "T1",
+        "T2",
+        "T3",
+        "T4",
+        "T5"
+      ],
+      "tests/test_sampler.py::test_parse_treats_a_name_pointer_with_zero_length_as_unknown": [
+        "T1",
+        "T3"
+      ],
+      "tests/test_sampler.py::test_the_tools_own_cost_is_reported": [
+        "T7"
+      ],
+      "tests/test_sampler.py::test_window_length_and_capacity_come_from_the_snapshots": [
+        "T9"
+      ]
+    },
+    "identical": [
+      [
+        "tests/test_sampler.py::test_a_process_born_and_exited_inside_the_window_counts_all_its_time",
+        "tests/test_sampler.py::test_a_reused_process_id_is_two_records",
+        "tests/test_sampler.py::test_the_tools_own_cost_is_reported"
+      ],
+      [
+        "tests/test_sampler.py::test_parse_marks_a_name_pointing_outside_the_buffer_as_unknown",
+        "tests/test_sampler.py::test_parse_treats_a_name_pointer_with_zero_length_as_unknown"
+      ]
+    ],
+    "contained": [
+      [
+        "tests/test_sampler.py::test_live_snapshot_sees_this_process_and_every_processor",
+        "tests/test_sampler.py::test_parse_marks_a_name_pointing_outside_the_buffer_as_unknown"
+      ],
+      [
+        "tests/test_sampler.py::test_live_snapshot_sees_this_process_and_every_processor",
+        "tests/test_sampler.py::test_parse_reads_a_name_that_ends_exactly_at_the_buffer_end"
+      ],
+      [
+        "tests/test_sampler.py::test_live_snapshot_sees_this_process_and_every_processor",
+        "tests/test_sampler.py::test_parse_reads_every_field_of_every_entry"
+      ],
+      [
+        "tests/test_sampler.py::test_live_snapshot_sees_this_process_and_every_processor",
+        "tests/test_sampler.py::test_parse_treats_a_name_pointer_with_zero_length_as_unknown"
+      ],
+      [
+        "tests/test_sampler.py::test_parse_marks_a_name_pointing_outside_the_buffer_as_unknown",
+        "tests/test_sampler.py::test_parse_reads_a_name_that_ends_exactly_at_the_buffer_end"
+      ],
+      [
+        "tests/test_sampler.py::test_parse_marks_a_name_pointing_outside_the_buffer_as_unknown",
+        "tests/test_sampler.py::test_parse_reads_every_field_of_every_entry"
+      ],
+      [
+        "tests/test_sampler.py::test_parse_reads_a_name_that_ends_exactly_at_the_buffer_end",
+        "tests/test_sampler.py::test_parse_reads_every_field_of_every_entry"
+      ],
+      [
+        "tests/test_sampler.py::test_parse_reads_an_entry_that_ends_exactly_at_the_buffer_end",
+        "tests/test_sampler.py::test_parse_marks_a_name_pointing_outside_the_buffer_as_unknown"
+      ],
+      [
+        "tests/test_sampler.py::test_parse_reads_an_entry_that_ends_exactly_at_the_buffer_end",
+        "tests/test_sampler.py::test_parse_reads_a_name_that_ends_exactly_at_the_buffer_end"
+      ],
+      [
+        "tests/test_sampler.py::test_parse_reads_an_entry_that_ends_exactly_at_the_buffer_end",
+        "tests/test_sampler.py::test_parse_reads_every_field_of_every_entry"
+      ],
+      [
+        "tests/test_sampler.py::test_parse_reads_an_entry_that_ends_exactly_at_the_buffer_end",
+        "tests/test_sampler.py::test_parse_treats_a_name_pointer_with_zero_length_as_unknown"
+      ],
+      [
+        "tests/test_sampler.py::test_parse_treats_a_name_pointer_with_zero_length_as_unknown",
+        "tests/test_sampler.py::test_parse_reads_a_name_that_ends_exactly_at_the_buffer_end"
+      ],
+      [
+        "tests/test_sampler.py::test_parse_treats_a_name_pointer_with_zero_length_as_unknown",
+        "tests/test_sampler.py::test_parse_reads_every_field_of_every_entry"
+      ]
+    ],
+    "killed_without_names": []
+  }
+}

@@ -74,6 +74,17 @@ def test_pyproject_packages_the_dotfile_manifests():
     )
 
 
+@pytest.mark.skipif(not (ROOT / ".git").exists(), reason="needs the git checkout")
+def test_no_package_source_is_git_ignored():
+    """Regression guard: the template's unanchored `lib/` rule once ignored
+    the whole wtf_perf/lib package, so the sampler would have been left out
+    of the commit and the wheel without a word (2026-11-18)."""
+    sources = [str(p.relative_to(ROOT)) for p in PKG.rglob("*.py") if "__pycache__" not in p.parts]
+    result = subprocess.run(["git", "check-ignore", "--no-index", *sources], cwd=str(ROOT),
+                            capture_output=True, text=True)
+    assert result.stdout.strip() == "", f"git-ignored package sources:\n{result.stdout}"
+
+
 def test_list_finds_tools_from_a_foreign_working_directory(tmp_path):
     """The aggregator root comes from the package location, not the cwd: this is
     what makes `wtf-perf` work from anywhere and under the wtf-windows

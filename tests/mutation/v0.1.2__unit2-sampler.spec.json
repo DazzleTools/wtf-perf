@@ -1,0 +1,17 @@
+{
+  "test_command": ["python", "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests/test_sampler.py"],
+  "mutations": [
+    {"id": "S1", "file": "wtf_perf/lib/sampler.py", "original": "while off + _ENTRY_SIZE <= size:", "mutated": "while off + _ENTRY_SIZE < size:", "note": "drops a last entry that ends exactly at the buffer end"},
+    {"id": "S2", "file": "wtf_perf/lib/sampler.py", "original": "_OFF_IO = 208", "mutated": "_OFF_IO = 200", "note": "I/O counters read from the wrong offset"},
+    {"id": "S3", "file": "wtf_perf/lib/sampler.py", "original": "cycle, create, user, kernel = struct.unpack_from", "mutated": "cycle, create, kernel, user = struct.unpack_from", "note": "user and kernel swapped"},
+    {"id": "S4", "file": "wtf_perf/lib/sampler.py", "original": "if not ptr or not length:", "mutated": "if not ptr and not length:", "note": "or/and swap on the missing-name guard"},
+    {"id": "S5", "file": "wtf_perf/lib/sampler.py", "original": "return IDLE_PROCESS_NAME if pid == 0 else \"?\"", "mutated": "return IDLE_PROCESS_NAME if pid != 0 else \"?\"", "note": "idle-name condition flipped"},
+    {"id": "S6", "file": "wtf_perf/lib/sampler.py", "original": "if start < 0 or start + length > len(data):", "mutated": "if start < 0 or start + length >= len(data):", "note": "name ending exactly at the buffer end rejected"},
+    {"id": "S7", "file": "wtf_perf/lib/sampler.py", "original": "for i in range(n):", "mutated": "for i in range(1, n):", "note": "processor 0 skipped in the totals"},
+    {"id": "S8", "file": "wtf_perf/lib/sampler.py", "original": "if d.record.pid == self.self_pid and not d.born)", "mutated": "if d.record.pid == self.self_pid)", "note": "self cost counts a born record with the same pid"},
+    {"id": "S9", "file": "wtf_perf/lib/sampler.py", "original": "if seconds <= 0 or interval <= 0:", "mutated": "if seconds < 0 or interval <= 0:", "note": "seconds=0 accepted"},
+    {"id": "S10", "file": "wtf_perf/lib/sampler.py", "original": "if t - t0 >= seconds:", "mutated": "if t - t0 > seconds:", "note": "one extra poll at exact window length"},
+    {"id": "S11", "file": "wtf_perf/lib/sampler.py", "original": "born=born, exited=k not in current,", "mutated": "born=born, exited=k not in last,", "note": "exited always false"},
+    {"id": "S12", "file": "wtf_perf/lib/sampler.py", "original": "cap = max_polls if max_polls is not None else", "mutated": "cap = max_polls if max_polls else", "note": "max_polls=0 ignored"}
+  ]
+}

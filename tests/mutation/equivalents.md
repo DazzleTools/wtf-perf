@@ -12,3 +12,10 @@ Entries are bound to the file's `git hash-object` (first 12). When the hash no l
 | `show_mode="default"` -> `"all"` | equivalent (conditional) | No tool is hidden, so both modes list the same rows. Reopen when a hidden or internal tool is added. | 2026-11-18 | 1 (fresh subagent) |
 | `kit_filter=None` -> `"core"` | equivalent (conditional) | There is one kit, `core`, so filtering to it lists everything. Reopen when a second kit exists. | 2026-11-18 | 1 (fresh subagent) |
 | `if len(desc) > avail:` -> `>=` | don't-care | Differs only for a description exactly `avail` characters long, where it would add an ellipsis one character early. Cosmetic; not worth a width-tuned fixture. | 2026-11-18 | 1 (fresh subagent) |
+
+## wtf_perf/lib/sampler.py @ 950cfe9fe670
+
+| Original -> mutated | Label | Reason | Date | Mode |
+|---|---|---|---|---|
+| `if d.record.pid == self.self_pid and not d.born` -> guard removed | equivalent | The tool's own process is alive for the whole window, so no process born inside the window can hold its process id. The guard is defensive only. | 2026-11-18 | 1 (fresh subagent) |
+| `max_polls is not None` -> truthiness | don't-care | Differs only for `max_polls=0`, a window with zero polls, which observes nothing either way and no caller passes. | 2026-11-18 | 1 (fresh subagent) |
