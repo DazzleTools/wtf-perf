@@ -1,0 +1,155 @@
+# git-repokit-common
+
+Shared scripts, hooks, and developer tools for DazzleTools projects. Consumed as a git subtree in `scripts/`.
+
+## Quick Start
+
+Add to your project:
+
+```bash
+# Add as a subtree at scripts/
+git subtree add --prefix=scripts https://github.com/DazzleTools/git-repokit-common.git main --squash
+
+# Add named remote for convenience
+git remote add repokit-common https://github.com/DazzleTools/git-repokit-common.git
+
+# Install git hooks
+bash scripts/install-hooks.sh
+```
+
+Update to latest:
+
+```bash
+bash scripts/update-common.sh            # pull latest
+bash scripts/update-common.sh --check    # check if behind upstream
+bash scripts/update-common.sh --push     # push local changes upstream
+```
+
+## What's Included
+
+### Git Hooks (`hooks/`)
+- **pre-commit** -- Version sync (`sync-versions.py --auto`; silent for a project with `versioning = "off"`), each language's pre-commit check on the staged files (on every branch; a Paradox mod's localization `.yml` saved without a UTF-8 BOM is blocked, because the game skips such a file without an error), private content protection (built-in patterns plus the project's own `private-patterns`), large file blocking. Works in normal clones and in git worktrees
+- **post-commit** -- Refreshes the version hash after a commit when the version source carries one (a Python `_version.py`), and says so plainly when it could not
+- **pre-push** -- Runs the steps of each of the project's **languages** (the `languages` setting, else detected from the root markers, else Python), then the tests. Each language has a **check step**, which the project can replace with its own `check-command` for that language: Python's is the syntax check (the package and root-level `.py` files); a Paradox mod's is the game's Tiger linter when it is installed, whose summary is shown and whose full report goes to `.git/repokit-<linter>.txt`, never blocking; other languages have none unless the project sets one. The Python syntax check runs only for a project whose languages include `python`. Each language also has **product checks**: debugger statements are an error and print-style noise a warning -- `pdb` / `print()` for Python, `debugger;` / `console.log()` for TypeScript and JavaScript, `Debugger.Break()` / `Console.WriteLine()` for C#; C/C++ and Paradox mods have none, their build, tests or linter being the gate. Tests run as `python -P -m pytest` over the project's declared `testpaths`, or `tests/` without `one-offs/`, `thinking/` and the vendored repokit-common copy; a project can replace pytest with its own `test-command`. The result is reported as it happened: failing tests, or a test runner that cannot start, block a push to a **gated branch** (`strict-branches`: by default `main`, `master`, `staging` and `live`) and are warnings anywhere else, so experimental branches can still be pushed; no tests is a notice, not a failure. Before any of that, on every branch, **private content protection at push**: a push is refused when a commit it sends adds a private file (the same list pre-commit uses: the built-in patterns, the project's `private-patterns`, minus `.repokit-allowlist`). That catches a private branch pushed by mistake, a fast-forward merge (which makes no commit, so pre-commit never runs), and a commit made with `--no-verify`. Only commits the remote does not have yet are read, so files a project pushed before never block it; a file a later commit deleted still blocks, because it travels inside the earlier commit. For a remote that is itself private: `REPOKIT_ALLOW_PRIVATE_PUSH=1 git push ...` for one push, or `git config repokit.allowPrivatePush true` for the clone
+
+**Consent, asked once.** A private-looking file that is meant to be public gets an entry in `.repokit-allowlist`. pre-push reads the allowlist from the commits it sends, not the working tree, so the consent travels with the file. At a terminal, a refused commit asks whether to add the paths; a yes stages the allowlist into the same commit. A refused push on a public branch asks the same, and on a yes lets the push through and asks you to commit the allowlist. A private branch is never offered the allowlist: the question there is the remote, not the files.
+
+**Agents and CI.** The hooks never wait for an answer. They ask only at a terminal, and never when `CI` or `CLAUDECODE` (Claude Code) is set or with `REPOKIT_INTERACTIVE=0`; anything else gets the refusal at once. Each refused file also gets one line for tools to read, since git hides a hook's exit code (`git push` exits 1 whatever the hook returned):
+
+```
+repokit-common: refused push=private-content reason=private-branch ref=private fix=config:repokit.allowPrivatePush,env:REPOKIT_ALLOW_PRIVATE_PUSH,no-verify path=convos/talk.md
+```
+
+`reason` is `public-branch` or `private-branch`; `fix` lists what would let it through (`allowlist`, `env:REPOKIT_ALLOW_PRIVATE_PUSH`, `config:repokit.allowPrivatePush`, `no-verify`); `path` comes last, so a path with spaces stays whole. pre-commit prints the same with `commit=`. The hook exits 1 when it refuses and 2 when it cannot run. An agent reports the line to its person and does not set an override or edit the allowlist on its own: consent is the person's.
+- **lib.sh** -- The code the three hooks share: finding the vendored copy, its settings and the version tool, the branch rules, the output markers, and loading the language profiles. One place, so a fix reaches every hook
+- **profiles/** -- One file per language (`python.sh`, `javascript.sh`, `typescript.sh`, `csharp.sh`, `c-cpp.sh`, `paradox.sh`) holding that language's steps, so the hooks themselves keep only what every project shares. A profile may define any of `rk_profile_<language>_setup`, `_check`, `_product` and `_precommit` (a hyphen in the name becomes `_`); a step it does not define is skipped. **Adding a language is one new file.** Profiles are POSIX `sh`, because pre-commit runs under `sh` and loads them; `profiles/python.sh` describes the contract. A language with no profile file gets no language-specific steps, and a missing `profiles/` folder stops the hook rather than silently dropping every check
+
+**How the hooks run.** `install-hooks.sh` writes a small stub for each hook into `.git/hooks`. The stub finds the checkout's own vendored copy and runs the real hook from there, so **pulling a new repokit-common updates the hooks**, with no need to re-install. It looks first in the folder the installer was run from, which the installer records relative to the repository root, so a copy at any path is found even if git does not track it. Then it tries `scripts/repokit-common/`, `scripts/`, the root, and anywhere git tracks `repokit_config.py`. In a git worktree the stub finds that worktree's copy. On a branch whose tree has no vendored copy, the checks cannot run: a gated branch is blocked, and any other branch gets a warning. `REPOKIT_STRICT_BRANCHES= git <command>` loosens that for one run, and `--no-verify` skips the hooks entirely. The installer writes the project's `strict-branches` into each stub, so re-run it after changing that setting. If `core.hooksPath` is set, git ignores `.git/hooks`, and the installer warns about it.
+
+**Output.** Messages use `[OK]`, `[!]` and `[X]` with no colour codes when they are not going to a terminal: an IDE's git panel, CI, or a tool that captures them. When they are going to a terminal, they use `✓`, `⚠` and `✗` with colour. `output = "plain"` or `"rich"` fixes the choice, and `REPOKIT_OUTPUT` overrides the setting for one run.
+
+**Line endings.** The hooks and shell scripts are kept at LF through `.gitattributes`. Git for Windows' bash also runs CRLF hooks correctly.
+
+### Version Management
+- **sync-versions.py** -- Single source of truth for version bumping with git metadata. The source is a Python `_version.py`, a plain `VERSION` file holding `x.y.z[-phase]`, or a C/C++ `version.h` of `#define` lines; the last two are edited on their bytes and carry no `__version__` stamp. **Extra targets** keep other files at the same version: a JSON field (a `plugin.json`, a `package.json`, a browser `manifest.json`), or any text file's version line found by a `pattern` (a Paradox `descriptor.mod`, a `Cargo.toml`, a `setup.py`), with only the version text changing. See [docs/sync-versions.md](docs/sync-versions.md) for full reference.
+- **update-common.sh** -- Pull, push or check the vendored copy against upstream. A pull goes through a tree whose only change is the version stamp the pre-commit hook writes (a snapshot is saved first and the file re-stamped after), and refuses any other uncommitted change by name, touching nothing
+- **update-version.sh** -- Legacy bash version updater (deprecated; use sync-versions.py)
+
+### GitHub Tools
+- **gh_issue_full.py** -- Display complete issue context: timeline, cross-refs, sub-issues, comments. Shows the body and every comment in full by default; `--no-full` truncates. The default can be changed per user with `GH_ISSUE_FULL_DEFAULT=truncated` or per repo with `gh-issue-full-default = "truncated"` under `[tool.repokit-common]` in `pyproject.toml`; a flag always wins, and the environment variable wins over the repo setting.
+- **gh_sub_issues.py** -- Manage GitHub sub-issue relationships
+
+### Knowledge Vault Tools
+- **[docs/vault-spec.md](docs/vault-spec.md)** -- the Vault Specification: canonical definition of `private/claude/` knowledge vaults (layout, maturity ladder, wikilink rules, write authority, ecosystem)
+- **generate-backlinks.py** -- Generate the `_oracle/backlinks.md` reverse-link index for a vault
+- **vault-lint.py** -- Lint a vault against the spec: broken-link classes, orphans, freshness, manifest coverage; `--check` for CI/hooks, `--fix` for the provably-safe class only
+
+### Claude Code Session Tools
+- **search_sesslog.py** -- Search Claude Code JSONL session transcripts
+- **extract_tool_result.py** -- Find and extract tool results from session data
+
+### CLI Demo Recording (`demo/`)
+- **demo/build_demo.py** -- Build CLI demo recordings
+- **demo/demo_render.py** -- Render demo recordings
+- **demo/vhs/** -- VHS tape templates for CLI demo recording
+
+### Utilities
+- **install-hooks.sh** -- Install the hook stubs into `.git/hooks/` (see "How the hooks run" above). A different hook already there is kept as `<hook>.backup-YYYYMMDD-HHMMSS`; an identical one is left alone
+- **repokit_config.py** -- Find and read the project's `[tool.repokit-common]` settings (used by the tools and hooks; `--get KEY`, `--shell KEY...`, `--where`)
+- **paths.sh** -- Common path constants for scripts
+- **safe_move.sh** -- Hash-verified file move with timestamp preservation
+
+## Configuration
+
+Projects configure repokit-common via `[tool.repokit-common]` in `pyproject.toml`. A project without a `pyproject.toml` (C/C++, Rust, ...) puts the same table in `.repokit-common.toml` at its repository root. Every key is optional; a project with pytest tests in `tests/`, or with no tests, needs none of the hook settings.
+
+```toml
+[tool.repokit-common]
+version-source = "mypackage/_version.py"
+changelog = "CHANGELOG.md"
+repo-url = "https://github.com/DazzleTools/my-project"
+tag-prefix = "v"
+tag-format = "pep440"
+private-patterns = ["private/", "local/", ".env"]
+private-branches = ["private", "local", "feature/*", "scratch"]
+test-command = "python tests/run_all.py"
+print-warning = false
+strict-branches = ["main", "master", "staging", "live", "release/*"]
+languages = ["python"]
+output = "auto"
+
+[tool.repokit-common.check-command]
+python = "ruff check ."            # replaces the Python syntax check
+```
+
+A Paradox game mod (here a Crusader Kings III mod kept in `mod/`) declares its language and game, and keeps its descriptor's version line in step with a plain `VERSION` file:
+
+```toml
+[tool.repokit-common]
+languages = ["paradox"]
+paradox-game = "ck3"
+version-source = "VERSION"
+
+[[tool.repokit-common.extra-targets]]
+path = "mod/descriptor.mod"
+pattern = '^version="([^"]*)"\r?$'
+format = "base"
+```
+
+| Key | Read by | Meaning |
+|-----|---------|---------|
+| `version-source`, `changelog`, `repo-url`, `tag-prefix`, `tag-format` | `sync-versions.py` | See [docs/sync-versions.md](docs/sync-versions.md). `version-source` may be a Python `_version.py`, a plain `VERSION` file, or a C/C++ header |
+| `versioning` | `sync-versions.py`, pre-commit, post-commit | `"off"` for a project that keeps no version source (a notes repository, a tool versioned another way): the tool does nothing and exits 0, and the commit hooks say nothing about versions. Anything else means on |
+| `languages` | pre-push | The product's languages, e.g. `["python"]`, `["c-cpp"]`, `["typescript", "python"]`. Unset, they are detected from the root markers (`pyproject.toml` with `[project]`, `setup.py` or `setup.cfg`; `CMakeLists.txt`, `vcpkg.json`, `meson.build` or a `.vcxproj`; a `.csproj`; `tsconfig.json`, else `package.json`), and a project that shows nothing is Python -- so nothing changes for a project that sets no key. `paradox` (a Paradox game mod) is declared, never detected. Each language's profile runs its steps (see pre-push above), and the Python ones only run when `python` is in the list: a JavaScript project that also keeps Python tooling it wants syntax-checked declares `["javascript", "python"]`. A name with no profile yet gets no language-specific steps. Markers below the root, such as a plugin's `plugin/tsconfig.json`, are not detected, so such a project declares its languages |
+| `check-command` | pre-push | A table of commands, one per language, each replacing that language's check step: `[tool.repokit-common.check-command]` with `python = "ruff check ."`, or the dotted form `check-command.typescript = "npx tsc -p plugin --noEmit"`. A language with no default step gets one; `""` turns the step off. Run with `sh -c` from the repository root; a non-zero exit blocks a push to a gated branch and warns on any other, as failing tests do |
+| `paradox-game` | pre-push | For `languages = ["paradox"]`: the game (`ck3`, `vic3`, `imperator`, ...). It picks the Tiger linter the paradox check step runs (`ck3-tiger`, `vic3-tiger`, `imperator-tiger`) on the mod in `mod/`, or at the root when `descriptor.mod` is there. Tiger is advisory: its findings never block, and it is skipped, with a note, when it is not on PATH. A game with no Tiger build needs `check-command.paradox` for a linter |
+| `gh-issue-full-default` | `gh_issue_full.py` | `full` or `truncated` |
+| `private-patterns` | pre-commit, pre-push | Extra paths a public branch, or a remote, must not receive. Each entry is a **literal path prefix from the repository root**, not a regular expression: `private/` blocks `private/notes.md` but not `docs/private/notes.md`, and `.env` blocks `.env` and `.env.local`. Entries are added to the built-in list, never replacing it. `.repokit-allowlist` still exempts listed paths |
+| `private-branches` | pre-commit | The branches where private content may be committed, as shell glob patterns; every other branch is public. Unset means `local`, `private` and the `feature/`, `feat/`, `prototype/`, `experiment/` and `spike/` prefixes. Setting it **replaces** that list, as `strict-branches` does, so list every branch you want private (git-repokit writes it for a project created with `--private-branch NAME`). `REPOKIT_PRIVATE_BRANCHES` overrides it for one run, and an empty value makes every branch public |
+| `test-command` | pre-push | Replaces pytest. Run with `sh -c` from the repository root; any non-zero exit counts as failing tests |
+| `print-warning` | pre-push | `false` turns off the warning about many `print()` calls (for CLIs, whose output is `print()` by design). The count never includes `tests/` or the vendored copy |
+| `strict-branches` | pre-push, hook stubs | The gated branches, as shell glob patterns. Failing tests, or a test runner that cannot start, block a push to them and are warnings elsewhere. Unset means `main`, `master`, `staging` and `live`, from git-repokit's branch model: `main` passes CI, `staging` is pre-release, `live` is production. `REPOKIT_STRICT_BRANCHES` overrides it for one run, and an empty value gates nothing |
+| `output` | all hooks | `auto` (default), `plain` or `rich`; see "Output" above. `REPOKIT_OUTPUT` overrides it for one run |
+
+**How the settings are found.** `repokit_config.py` walks up from repokit-common's own directory to the nearest `pyproject.toml` that holds the table, or to a `.repokit-common.toml`; `pyproject.toml` wins when both are in one directory, and a `pyproject.toml` without the table is walked past. The walk never leaves the project: it stops at the repository root, or at the superproject's root when repokit-common is a git submodule. This works wherever the copy is mounted (`scripts/`, `scripts/repokit-common/`, or deeper). repokit-common's own `.repokit-common.toml` (it versions itself from its `VERSION` file) travels with every vendored copy and is stepped over there: it is read only where repokit-common is the project itself. The hooks run from the vendored copy, through the stubs, so they read the settings through that copy's own `repokit_config.py`. A settings file that exists but cannot be parsed stops the commit or push with the reason, rather than silently using defaults. So does a `.repokit-common.toml` with a key outside any table: settings always go under the `[tool.repokit-common]` header, and other tables may share the file.
+
+**Running the tests in a consumer.** A bare `pytest` at a consumer's root runs the consumer's own tests and skips the vendored copy's suite (`conftest.py` at the copy's root); `pytest scripts/repokit-common/tests` still runs it on purpose.
+
+### Tag Format
+
+The `tag-format` option controls how git tags are generated for CHANGELOG compare links and `--check` validation:
+
+| Value | Example Tag | When to Use |
+|-------|-------------|-------------|
+| `"pep440"` (default) | `v0.1.3a1` | Projects using PEP 440 tags for PyPI compatibility |
+| `"human"` | `v0.1.3-alpha` | Projects using human-readable tags matching CHANGELOG headers |
+
+For stable releases (no phase suffix), both formats produce identical tags (`v0.5.0`). The difference only matters for pre-release versions (alpha, beta, rc).
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for the full version history. Current version: see [`VERSION`](VERSION).
+
+## License
+
+GPL-3.0-or-later. See [LICENSE](LICENSE) for details.
