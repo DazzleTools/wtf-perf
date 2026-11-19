@@ -1,0 +1,35 @@
+{
+    "name": "perf",
+    "version": "0.1.7",
+    "description": "Why is my Windows PC busy? Accounts for every point of the CPU headline.",
+    "namespace": "core",
+    "language": "python",
+    "platform": "windows",
+    "platforms": ["windows"],
+    "runtime": {
+        "type": "python",
+        "pass_through": true,
+        "module": "wtf_perf",
+        "entry_point": "main",
+        "script_path": "wtf_perf/cli.py"
+    },
+    "taxonomy": {
+        "category": "windows-diagnostics",
+        "tags": ["performance", "cpu", "processes", "task-manager", "file-operations"]
+    },
+    "diagnostics": {
+        "event_logs": [],
+        "event_ids": [],
+        "required_privileges": "user",
+        "ps1_scripts": [],
+        "supports_history": false,
+        "supports_ai": false
+    },
+    "source": {
+        "url": "https://github.com/DazzleTools/wtf-perf.git"
+    },
+    "lifecycle": {
+        "stage": "graduated",
+        "graduated_to": "https://github.com/DazzleTools/wtf-perf"
+    }
+}

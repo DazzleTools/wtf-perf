@@ -31,7 +31,9 @@ pip install -e ".[dev]"
 ```bash
 wtf-perf --help          # the tools and some examples
 wtf-perf list            # the available tools
-wtf-perf cpu             # account for the CPU headline (in development)
+wtf-perf                 # same as: wtf-perf cpu
+wtf-perf cpu -s 15       # sample 15 s and account for every point of the CPU headline
+wtf-perf cpu --json      # the same report as JSON
 python -m wtf_perf --version
 ```
 

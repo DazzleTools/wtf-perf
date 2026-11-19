@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.7] - 2026-11-18
+
+### Added
+- `wtf-perf` with no arguments runs `wtf-perf cpu`.
+- A root `.wtf.json` manifest, so wtf-windows can mount the repository and run it as `wtf perf`.
+- A human test checklist, `tests/checklists/v0.1.7__Tool__wtf-perf-cpu.md`.
+
 ## [0.1.6] - 2026-11-18
 
 ### Added
@@ -46,7 +53,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 - The project's structure, from git-repokit.
 
-[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.6...HEAD
+[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.7...HEAD
+[0.1.7]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.3...v0.1.4

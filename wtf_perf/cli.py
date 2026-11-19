@@ -84,9 +84,16 @@ def build_engine() -> AggregatorEngine:
     return engine
 
 
+DEFAULT_TOOL = "cpu"
+
+
 def main(argv: list[str] | None = None) -> int:
+    """A bare `wtf-perf` (no arguments) runs the cpu tool; anything else is
+    dispatched unchanged."""
     if argv is None:
         argv = sys.argv[1:]
+    if not argv:
+        argv = [DEFAULT_TOOL]
     return build_engine().run(argv)
 
 

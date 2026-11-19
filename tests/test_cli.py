@@ -159,9 +159,9 @@ def test_version_shows_the_display_version_then_the_build_string(tmp_path):
     assert f"{get_display_version()} ({__version__})" in result.stdout, result.stdout
 
 
-def test_main_hands_its_argv_to_the_engine_unchanged(monkeypatch):
-    """main(argv) dispatches exactly argv -- an explicit empty list included --
-    and never falls back to the process's own command line."""
+def test_bare_command_runs_cpu_and_explicit_argv_passes_unchanged(monkeypatch):
+    """`wtf-perf` alone runs cpu; main(argv) never falls back to the process's
+    own command line when argv is given."""
     import wtf_perf.cli as cli
 
     seen = []
@@ -175,7 +175,17 @@ def test_main_hands_its_argv_to_the_engine_unchanged(monkeypatch):
     monkeypatch.setattr(sys, "argv", ["wtf-perf", "sentinel-from-sys-argv"])
     assert cli.main([]) == 0
     assert cli.main(["list"]) == 0
-    assert seen == [[], ["list"]]
+    monkeypatch.setattr(sys, "argv", ["wtf-perf"])
+    assert cli.main() == 0
+    assert seen == [["cpu"], ["list"], ["cpu"]]
+
+
+def test_root_manifest_lets_wtf_windows_pass_through_to_this_package():
+    """The umbrella mounts this repo and runs `python -m <module>`; the root
+    .wtf.json must name this package and pass-through dispatch."""
+    m = json.loads((ROOT / ".wtf.json").read_text(encoding="utf-8"))
+    assert m["name"] == "perf" and m["namespace"] == "core"
+    assert m["runtime"]["pass_through"] is True and m["runtime"]["module"] == "wtf_perf"
 
 
 def test_cli_epilog_lists_all_tools(capsys):
