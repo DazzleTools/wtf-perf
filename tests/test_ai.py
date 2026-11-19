@@ -98,5 +98,7 @@ def test_saved_detail_is_used_and_the_flag_overrides_it(tmp_path, monkeypatch):
 
 
 def test_command_line_of_this_process_is_readable():
-    cl = aiwire.read_command_line(os.getpid())
+    from wtf_perf.platforms.windows import read_command_line
+
+    cl = read_command_line(os.getpid())
     assert cl is None or "python" in cl.lower()

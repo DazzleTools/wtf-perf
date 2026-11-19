@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-18
+
+### Added
+- `--platform` (detected by default) and `--providers`: the Windows data sources now sit behind a per-platform provider set, and `--providers` lists each one and whether it can run on this machine.
+- Linux and macOS provider stubs. On those systems, or when a platform is named that cannot run here, `wtf-perf cpu` prints one line saying which source is missing and exits with status 2, without sampling.
+- The JSON report's `system` section gains `provider_set`; `system.platform` is unchanged.
+
+### Fixed
+- Redirecting the report to a file on a console whose code page is not UTF-8 no longer crashes on the first ellipsis or box-drawing character; unencodable characters are replaced.
+- Saved AI prompts (`--ai prompt-only`) now go under `WTF_PERF_CONFIG_DIR` when it is set, like the settings file, instead of always under `~/.wtf-perf`.
+- `pip install wtf-perf` works with older versions of pip, which otherwise skip the pre-release dazzlecmd-lib builds wtf-perf depends on.
+
+### Changed
+- The test suite also runs on Linux in CI.
+- The README explains what the report shows (the verdict, the ledger, applications, short-lived processes, file operations and findings), lists every option, and states the known limits.
+- New `docs/platform-support.md`: what works on which platform, provider by provider. CONTRIBUTING, the pull request template and a new AGENTS.md set out the promises every change keeps and how contributions, including AI-assisted ones, are vetted.
+- A bug-report template asking for what a wtf-perf report needs (the `--json` output, the Windows version, elevation); Dependabot for Python and GitHub Actions updates; a release-notes template.
+
 ## [0.1.15] - 2026-11-18
 
 ### Changed
@@ -96,7 +114,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 - The project's structure, from git-repokit.
 
-[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.15...HEAD
+[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.15...v0.2.0
 [0.1.15]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.14...v0.1.15
 [0.1.14]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.13...v0.1.14
 [0.1.13]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.12...v0.1.13

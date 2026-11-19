@@ -69,7 +69,9 @@ def test_live_counters_read_plausible_values():
     """Read-only, about 0.3 s: utility and processor time are present and in range."""
     import time
 
-    w = CounterWindow()
+    from wtf_perf.platforms.windows import counter_backend
+
+    w = CounterWindow(backend=counter_backend())
     w.start()
     time.sleep(0.3)
     values = w.finish()

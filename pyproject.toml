@@ -31,7 +31,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "dazzlecmd-lib>=0.10,<1.0",
+    "dazzlecmd-lib>=0.10.31a0,<1.0",  # PyPI has only 0.10 pre-releases; naming one lets any pip pick them
     "rich>=13",
     "dazzle-loglib>=0.3",
 ]

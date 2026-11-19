@@ -19,16 +19,14 @@ Three decisions from that design are visible below:
 """
 from __future__ import annotations
 
-import ctypes
 import json
 import os
-import struct
-from pathlib import Path
-from typing import Dict, Iterable, List, Optional
+from typing import Callable, Dict, Iterable, List, Optional
 
 from ._vendor.ailib import parsers
 from ._vendor.ailib.backend import build
 from ._vendor.ailib.types import ON_PREM, Request, Spec
+from .paths import settings_dir
 
 DETAIL_LEVELS = ("names", "full")
 DEFAULT_BACKEND = "claude"
@@ -81,7 +79,7 @@ def presets(model: str = "") -> Dict[str, Spec]:
         "ollama": Spec("openai_compat", name="ollama", endpoint="http://127.0.0.1:11434/v1",
                        model=model, on_prem=True),
         "prompt-only": Spec("prompt-file", name="prompt-only",
-                            endpoint=str(Path.home() / ".wtf-perf" / "ai")),
+                            endpoint=str(settings_dir() / "ai")),
     }
 
 
@@ -196,58 +194,13 @@ def run_ai(report: dict, backend_name: str = DEFAULT_BACKEND, detail: str = DEFA
     return out
 
 
-# --- command lines for --ai-detail full --------------------------------------
 
-_PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
-_PROCESS_COMMAND_LINE_INFORMATION = 60
-_STATUS_INFO_LENGTH_MISMATCH = 0xC0000004
-
-
-def read_command_line(pid: int) -> Optional[str]:
-    """The command line of a live process via NtQueryInformationProcess class 60.
-    None when the process cannot be opened (another user's or a protected
-    process without elevation, or gone)."""
-    try:
-        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
-        ntdll = ctypes.WinDLL("ntdll")
-    except (AttributeError, OSError):
-        return None
-    kernel32.OpenProcess.restype = ctypes.c_void_p
-    kernel32.OpenProcess.argtypes = [ctypes.c_ulong, ctypes.c_int, ctypes.c_ulong]
-    kernel32.CloseHandle.argtypes = [ctypes.c_void_p]
-    ntdll.NtQueryInformationProcess.argtypes = [ctypes.c_void_p, ctypes.c_ulong, ctypes.c_void_p,
-                                                ctypes.c_ulong, ctypes.POINTER(ctypes.c_ulong)]
-    ntdll.NtQueryInformationProcess.restype = ctypes.c_long
-    h = kernel32.OpenProcess(_PROCESS_QUERY_LIMITED_INFORMATION, 0, pid)
-    if not h:
-        return None
-    try:
-        size = 4096
-        for _ in range(4):
-            buf = ctypes.create_string_buffer(size)
-            ret = ctypes.c_ulong(0)
-            st = ntdll.NtQueryInformationProcess(h, _PROCESS_COMMAND_LINE_INFORMATION, buf, size,
-                                                 ctypes.byref(ret)) & 0xFFFFFFFF
-            if st == _STATUS_INFO_LENGTH_MISMATCH:
-                size = max(size * 2, ret.value + 64)
-                continue
-            if st != 0:
-                return None
-            length, = struct.unpack_from("<H", buf.raw, 0)
-            ptr, = struct.unpack_from("<Q", buf.raw, 8)
-            start = ptr - ctypes.addressof(buf)
-            if length == 0 or start < 0 or start + length > size:
-                return ""
-            return buf.raw[start:start + length].decode("utf-16-le", errors="replace")
-        return None
-    finally:
-        kernel32.CloseHandle(h)
-
-
-def read_command_lines(pids: Iterable[int]) -> Dict[int, str]:
+def read_command_lines(pids: Iterable[int], reader: Callable[[int], Optional[str]]) -> Dict[int, str]:
+    """Command lines for ``pids`` through the platform's ``reader``; pids it
+    cannot read (None) are left out."""
     out = {}
     for pid in pids:
-        cl = read_command_line(pid)
+        cl = reader(pid)
         if cl is not None:
             out[pid] = cl
     return out

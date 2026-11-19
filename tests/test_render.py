@@ -10,6 +10,7 @@ from rich.console import Console
 
 from wtf_perf.lib.render import render_report
 from wtf_perf.lib.sampler import CpuTotals, ProcRecord
+import wtf_perf.tools.core.cpu.cpu as cpu
 from wtf_perf.tools.core.cpu.cpu import collect, main
 
 JSON_KEYS = {"system", "window", "headline", "reconciliation", "families", "images", "processes",
@@ -55,7 +56,15 @@ class _Pdh:
 
 def _report():
     # 1 ms poll gap: the scripted source supplies its own 1 s timestamps.
-    return collect(2, 1, 12, source=_Source(), counter_backend=_Pdh())
+    return collect(2, 1, 12, _platform())
+
+
+def _platform():
+    """A platform built from the scripted source and fake PDH -- never a real sampler."""
+    from wtf_perf.platforms import Platform, Provider
+
+    return Platform("scripted", {"snapshot": Provider("snapshot", _Source),
+                                  "counters": Provider("counters", _Pdh)})
 
 
 def test_the_report_has_every_documented_key_and_serialises():
@@ -75,6 +84,25 @@ def test_tier0_shows_the_verdict_and_every_ledger_line():
         assert needle in text, needle
 
 
-def test_main_rejects_a_bad_tier_without_sampling(capsys):
+def test_main_rejects_a_bad_tier_without_sampling(capsys, monkeypatch):
+    # Rule 1b: if the tier guard broke, collect must not be able to sample for real.
+    monkeypatch.setattr(cpu, "collect", lambda *a, **k: (_ for _ in ()).throw(AssertionError("sampled")))
     assert main(["--tier", "7"]) == 2
     assert "tiers" in capsys.readouterr().err
+
+
+def test_unencodable_characters_are_replaced_not_fatal():
+    """A cp437 stdout (a redirect on a non-UTF-8 console) must not crash on an ellipsis."""
+    raw = io.BytesIO()
+    stream = io.TextIOWrapper(raw, encoding="cp437")
+    cpu.tolerate_unencodable_output(stream)
+    stream.write("Claude Code… █")
+    stream.flush()
+    assert raw.getvalue() == "Claude Code? ".encode("cp437") + "█".encode("cp437")
+
+
+def test_saved_prompts_follow_the_settings_folder(monkeypatch, tmp_path):
+    from wtf_perf import aiwire
+
+    monkeypatch.setenv("WTF_PERF_CONFIG_DIR", str(tmp_path))
+    assert aiwire.presets()["prompt-only"].endpoint == str(tmp_path / "ai")

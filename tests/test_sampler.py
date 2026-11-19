@@ -10,9 +10,8 @@ import sys
 
 import pytest
 
-from wtf_perf.lib.sampler import (
-    IDLE_PROCESS_NAME, CpuTotals, ProcRecord, parse_cpu_buffer, parse_process_buffer, sample,
-)
+from wtf_perf.lib.sampler import CpuTotals, ProcRecord, sample
+from wtf_perf.platforms.windows import IDLE_PROCESS_NAME, parse_cpu_buffer, parse_process_buffer
 
 BASE = 0x1000_0000  # pretend address the buffer lived at
 
@@ -197,7 +196,7 @@ def test_rejects_a_non_positive_window():
 def test_live_snapshot_sees_this_process_and_every_processor():
     """Read-only, one call each: this process is in the table under its own
     name, and the processor totals cover every logical processor."""
-    from wtf_perf.lib.sampler import NtSource
+    from wtf_perf.platforms.windows import NtSource
 
     src = NtSource()
     _, procs = src.processes()

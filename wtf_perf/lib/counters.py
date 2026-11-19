@@ -1,4 +1,7 @@
-"""System-wide counters through PDH (pdh.dll), with no WMI and no PowerShell.
+"""System-wide counters over a sampling window (Windows: PDH, with no WMI or PowerShell).
+
+The backend comes from the platform (``wtf_perf.platforms.windows.CtypesPdh``);
+with none, every counter reads ``None``.
 
 The process table (``sampler``) gives time per process. Some numbers only
 exist system-wide: processor *utility* -- the figure Task Manager's headline
@@ -49,52 +52,6 @@ class PdhBackend(Protocol):
     def close(self) -> None: ...
 
 
-class CtypesPdh:
-    """The real backend: pdh.dll through ctypes. Reads only."""
-
-    _PDH_FMT_DOUBLE = 0x00000200
-
-    def __init__(self):
-        import ctypes
-        from ctypes import wintypes
-
-        class _Value(ctypes.Structure):
-            _fields_ = [("CStatus", wintypes.DWORD), ("doubleValue", ctypes.c_double)]
-
-        self._ctypes = ctypes
-        self._wintypes = wintypes
-        self._Value = _Value
-        pdh = ctypes.WinDLL("pdh")
-        pdh.PdhOpenQueryW.argtypes = [wintypes.LPCWSTR, ctypes.c_size_t, ctypes.POINTER(wintypes.HANDLE)]
-        pdh.PdhAddEnglishCounterW.argtypes = [wintypes.HANDLE, wintypes.LPCWSTR, ctypes.c_size_t,
-                                              ctypes.POINTER(wintypes.HANDLE)]
-        pdh.PdhCollectQueryData.argtypes = [wintypes.HANDLE]
-        pdh.PdhGetFormattedCounterValue.argtypes = [wintypes.HANDLE, wintypes.DWORD,
-                                                    ctypes.POINTER(wintypes.DWORD), ctypes.POINTER(_Value)]
-        pdh.PdhCloseQuery.argtypes = [wintypes.HANDLE]
-        self._pdh = pdh
-        self._query = wintypes.HANDLE()
-        if pdh.PdhOpenQueryW(None, 0, ctypes.byref(self._query)) != 0:
-            raise OSError("PdhOpenQueryW failed")
-
-    def add(self, path: str) -> Optional[object]:
-        h = self._wintypes.HANDLE()
-        if self._pdh.PdhAddEnglishCounterW(self._query, path, 0, self._ctypes.byref(h)) != 0:
-            return None
-        return h
-
-    def collect(self) -> bool:
-        return self._pdh.PdhCollectQueryData(self._query) == 0
-
-    def value(self, handle: object) -> Optional[float]:
-        v = self._Value()
-        if self._pdh.PdhGetFormattedCounterValue(handle, self._PDH_FMT_DOUBLE, None, self._ctypes.byref(v)) != 0:
-            return None
-        return float(v.doubleValue)
-
-    def close(self) -> None:
-        self._pdh.PdhCloseQuery(self._query)
-
 
 class CounterWindow:
     """Rates and percentages averaged between ``start()`` and ``finish()``."""
@@ -106,11 +63,8 @@ class CounterWindow:
         self._started = False
 
     def start(self) -> None:
-        if self._backend is None:
-            try:
-                self._backend = CtypesPdh()
-            except (OSError, AttributeError):    # AttributeError: no ctypes.WinDLL off Windows
-                self._backend = None
+        # No backend means no counters: every value comes back None. The
+        # platform supplies the backend (``wtf_perf.platforms``).
         if self._backend is not None:
             for name, path in self._counters.items():
                 self._handles[name] = self._backend.add(path)

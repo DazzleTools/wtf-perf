@@ -9,7 +9,6 @@ operations. Read-only; needs no elevation.
 from __future__ import annotations
 
 import argparse
-import ctypes
 import json
 import os
 import sys
@@ -25,6 +24,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--interval", type=int, default=100, metavar="MS",
                    help="poll gap in milliseconds (default 100; shorter catches shorter-lived processes, costs more)")
     p.add_argument("--top", type=int, default=12, help="rows per table (default 12)")
+    plat = p.add_argument_group("platform")
+    plat.add_argument("--platform", choices=("auto", "windows", "linux", "darwin"), default="auto",
+                      help="provider set to use (default: auto, the detected platform). Naming another "
+                           "platform cannot sample it; it lists or tries that platform's providers")
+    plat.add_argument("--providers", action="store_true",
+                      help="list each provider of the platform and whether it can run here, then exit")
     out = p.add_argument_group("output")
     out.add_argument("--json", dest="json_output", action="store_true", help="print the report as JSON")
     out.add_argument("-t", "--tier", default="0,1,2", help="tiers to show: 0, 1, 2, comma-separated, or 'all'")
@@ -47,8 +52,9 @@ def build_parser() -> argparse.ArgumentParser:
 def _config():
     from dazzlecmd_lib.config import ConfigManager
 
-    return ConfigManager(config_dir=os.environ.get("WTF_PERF_CONFIG_DIR") or os.path.join(
-        os.path.expanduser("~"), ".wtf-perf"))
+    from wtf_perf.paths import settings_dir
+
+    return ConfigManager(config_dir=str(settings_dir()))
 
 
 def save_ai_settings(updates: dict) -> None:
@@ -77,32 +83,64 @@ def _parse_tiers(spec: str) -> List[int]:
     return tiers
 
 
-def _is_elevated() -> bool:
-    try:
-        return bool(ctypes.windll.shell32.IsUserAnAdmin())
-    except Exception:
-        return False
+def resolve_platform(name: str):
+    from wtf_perf import platforms
+
+    return platforms.load(platforms.detect() if name == "auto" else name)
 
 
-def collect(seconds: float, interval_ms: int, top: int, source=None, counter_backend=None) -> dict:
-    """Sample, reconcile and judge. Returns the full report dict."""
+def print_providers(platform) -> None:
+    from wtf_perf.platforms import KINDS, REQUIRED
+
+    print(f"Providers for {platform.name} (this host: {sys.platform})")
+    for kind in KINDS:
+        ok, why = platform.provider(kind).available()
+        need = " (required)" if kind in REQUIRED else ""
+        print(f"  {kind:<13} {'available' if ok else 'unavailable':<12} {why}{need}")
+
+
+def collect(seconds: float, interval_ms: int, top: int, platform) -> dict:
+    """Sample, reconcile and judge on ``platform``'s providers. Returns the report dict.
+
+    Tests pass a platform built from stub providers; nothing here picks a real
+    source by default.
+    """
     from wtf_perf.lib.counters import CounterWindow
     from wtf_perf.lib.findings import find, verdict
     from wtf_perf.lib.ledger import build_ledger
     from wtf_perf.lib.sampler import sample
 
-    window = CounterWindow(backend=counter_backend)
+    source = platform.snapshot_source()
+    window = CounterWindow(backend=platform.counter_backend())
     window.start()
     result = sample(seconds, interval_ms / 1000.0, source=source)
     counters = window.finish()
     report = build_ledger(result, counters, top=top)
     report["findings"] = find(report)
     report["verdict"] = verdict(report, report["findings"])
-    report["system"] = {"logical_cpus": os.cpu_count(), "elevated": _is_elevated(), "platform": sys.platform}
+    report["system"] = {"logical_cpus": os.cpu_count(), "elevated": platform.is_elevated(),
+                        "platform": sys.platform, "provider_set": platform.name}
     return report
 
 
+def tolerate_unencodable_output(*streams) -> None:
+    """Replace characters the output encoding cannot hold, instead of crashing.
+
+    Redirecting to a file on a console whose code page is not UTF-8 (cp437,
+    cp1252) otherwise fails on the first ellipsis or box-drawing character
+    with UnicodeEncodeError -- found by the 0.2.0 checklist sweep.
+    """
+    for stream in streams or (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            try:
+                reconfigure(errors="replace")
+            except (ValueError, OSError):
+                pass
+
+
 def main(argv: Optional[List[str]] = None) -> int:
+    tolerate_unencodable_output()
     args = build_parser().parse_args(argv)
     try:
         tiers = _parse_tiers(args.tier)
@@ -112,8 +150,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     if args.seconds <= 0 or args.interval <= 0:
         print("wtf-perf cpu: --seconds and --interval must be positive", file=sys.stderr)
         return 2
-    if sys.platform != "win32":
-        print("wtf-perf cpu: Windows only", file=sys.stderr)
+    platform = resolve_platform(args.platform)
+    if args.providers:
+        print_providers(platform)
+        return 0
+    missing = platform.unavailable()
+    if missing:
+        why = "; ".join(f"{kind} {reason}" for kind, reason in missing)
+        print(f"wtf-perf cpu: the {platform.name} providers cannot sample here -- {why}. "
+              f"See --providers.", file=sys.stderr)
         return 2
 
     want_ai = args.ai is not None or args.ai_only
@@ -122,11 +167,12 @@ def main(argv: Optional[List[str]] = None) -> int:
         save_ai_settings({"backend": args.ai or None, "detail": args.ai_detail})
 
     def sample_and_read():
-        report = collect(args.seconds, args.interval, args.top)
+        report = collect(args.seconds, args.interval, args.top, platform)
         cmdlines = {}
         if want_ai and detail == "full":
             from wtf_perf import aiwire
-            cmdlines = aiwire.read_command_lines(p["pid"] for p in report["processes"] if not p["exited"])
+            cmdlines = aiwire.read_command_lines((p["pid"] for p in report["processes"] if not p["exited"]),
+                                                 platform.command_line_reader())
         return report, cmdlines
 
     def run_ai(report, cmdlines, stream_to=None):

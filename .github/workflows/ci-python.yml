@@ -56,11 +56,12 @@ jobs:
       run: |
         python -m pytest tests/ -v
 
-  # The vendored AI library (wtf_perf/_vendor/ailib) is meant to become a
-  # cross-platform DazzleLib member and has POSIX-only code (the key-file
-  # permission warning) that the Windows job skips. wtf-perf itself is
-  # Windows-only, so this job runs the library's tests only.
-  test-ailib-linux:
+  # The whole suite on Linux: the platform seam (wtf_perf/platforms) keeps
+  # every Windows call inside a function, so the package imports here, the
+  # Windows parsers are tested on bytes, the Linux and macOS stubs run, and the
+  # vendored AI library's POSIX-only code (the key-file permission warning) is
+  # exercised. Live Windows tests skip themselves.
+  test-linux:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v7
@@ -73,8 +74,8 @@ jobs:
         python -m pip install --upgrade pip setuptools wheel
         pip install -e ".[dev]" || pip install -e .
         pip install pytest
-    - name: Run the AI library's tests
-      run: python -m pytest -q tests/ailib tests/test_vendored_ailib.py
+    - name: Run the tests
+      run: python -m pytest -q tests
 
   build:
     runs-on: ubuntu-latest
