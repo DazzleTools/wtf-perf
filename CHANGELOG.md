@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.6] - 2026-11-18
+
+### Added
+- `wtf-perf cpu` works: it samples for a few seconds (`-s`, default 10) and prints a verdict, a table of where every point of the headline went, the findings, then (after a keypress) the application families, top processes, short-lived processes and file operations, and finally every system counter. `--json` prints the same report for scripts; `-t/--tier` picks tiers; `-np/--no-page` turns off the pauses; `--interval` sets the poll gap.
+
 ## [0.1.5] - 2026-11-18
 
 ### Added
@@ -41,7 +46,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 - The project's structure, from git-repokit.
 
-[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.5...HEAD
+[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.6...HEAD
+[0.1.6]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.2...v0.1.3

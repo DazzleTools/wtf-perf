@@ -95,9 +95,10 @@ def test_list_finds_tools_from_a_foreign_working_directory(tmp_path):
 
 
 def test_cpu_dispatches_from_a_foreign_working_directory(tmp_path):
-    result = _run(["cpu"], cwd=tmp_path)
+    """Dispatch reaches the cpu tool's own parser (help only: no sampling)."""
+    result = _run(["cpu", "--help"], cwd=tmp_path)
     assert result.returncode == 0, result.stderr
-    assert "wtf-perf cpu" in result.stdout
+    assert "wtf-perf cpu" in result.stdout and "--seconds" in result.stdout
 
 
 def _epilog(monkeypatch, capsys, columns):
