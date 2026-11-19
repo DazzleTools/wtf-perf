@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-11-18
+
+### Added
+- System-wide counters read through Windows' performance-counter API without WMI: processor utility (the figure Task Manager's headline shows), processor time and performance, interrupts, context switches, page faults and disk activity. A counter the machine lacks is reported as missing instead of failing the run.
+
 ## [0.1.2] - 2026-11-18
 
 ### Added
@@ -22,7 +27,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 - The project's structure, from git-repokit.
 
-[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/DazzleTools/wtf-perf/releases/tag/v0.1.0
