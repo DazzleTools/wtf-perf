@@ -23,6 +23,30 @@ def test_a_hook_chain_rolls_up_to_the_application_not_the_terminal():
     assert fam[(2, 20)] == "pwsh" and fam[(1, 10)] == "WindowsTerminal"
 
 
+def test_a_hook_run_through_cmd_belongs_to_the_application_that_ran_it():
+    """claude -> cmd -> python: the shell in between does not cut the chain
+    (the live run that found this put 319 such processes in a "python" family)."""
+    recs = [
+        _r(1, 0, "WindowsTerminal.exe", 10),
+        _r(2, 1, "pwsh.exe", 20),
+        _r(3, 2, "claude.exe", 30),
+        _r(4, 3, "cmd.exe", 40),
+        _r(5, 4, "python.exe", 50),
+        _r(6, 2, "python.exe", 60),          # python run by hand in that pwsh
+    ]
+    fam = assign_families(recs)
+    assert fam[(5, 50)] == "Claude Code" and fam[(4, 40)] == "Claude Code"
+    assert fam[(6, 60)] == "python"
+
+
+def test_a_known_application_is_not_absorbed_by_the_tool_that_launched_it():
+    """csb launches Claude Code sessions; the sessions and their hooks are Claude Code."""
+    recs = [_r(1, 0, "csb.exe", 10), _r(2, 1, "claude-dcc-2.1.323+dcc0.2.9.exe", 20), _r(3, 2, "node.exe", 30)]
+    fam = assign_families(recs)
+    assert fam[(2, 20)] == "Claude Code" and fam[(3, 30)] == "Claude Code"
+    assert fam[(1, 10)] == "csb"
+
+
 def test_a_parent_younger_than_its_child_is_a_reused_id_not_the_parent():
     recs = [
         _r(100, 0, "steam.exe", 500),       # holds pid 100 now, started after the child

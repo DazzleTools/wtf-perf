@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.5] - 2026-11-18
+
+### Added
+- The reconciliation ledger: the CPU headline split point by point into busy time plus the uplift from cores running above nominal speed, and busy time split into live processes by size, processes that exited during the window, interrupts and an unexplained remainder that is always shown.
+- Findings and a verdict that answers whether the headline adds up: one process dominating, many small consumers, an application hidden across many small processes, short-lived process churn, kernel-heavy processes, file-system call storms while the disk is idle, and large groups of idle processes (informational).
+
+### Fixed
+- Families: hooks run through a shell (`cmd /c python ...`) now count with the application that ran them, and a session launcher such as csb no longer absorbs the Claude Code sessions it starts.
+
 ## [0.1.4] - 2026-11-18
 
 ### Added
@@ -32,7 +41,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 - The project's structure, from git-repokit.
 
-[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.4...HEAD
+[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.5...HEAD
+[0.1.5]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.1...v0.1.2
