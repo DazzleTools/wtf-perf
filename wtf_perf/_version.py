@@ -29,7 +29,7 @@ PRE_RELEASE_NUM = 1  # PEP 440 pre-release number (e.g., a1, b2)
 PROJECT_PHASE = ""  # "prealpha", "alpha", "beta", "stable", or ""
 
 # Auto-updated by git hooks - do not edit manually
-__version__ = "0.1.14_main_19-20261118-2688ea05"
+__version__ = "0.1.14_main_20-20261118-ffc925a9"
 __app_name__ = "wtf-perf"
 
 
