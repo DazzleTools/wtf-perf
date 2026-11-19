@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.11] - 2026-11-18
+
+### Fixed
+- The vendored AI library's cache no longer deletes unrelated files that share its directory (it removed any JSON file without a timestamp), and its entries are written atomically. It also accepts a caller-supplied key so that an answer can be reused for the same facts.
+
 ## [0.1.10] - 2026-11-18
 
 ### Added
@@ -70,7 +75,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 - The project's structure, from git-repokit.
 
-[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.10...HEAD
+[Unreleased]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.11...HEAD
+[0.1.11]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.10...v0.1.11
 [0.1.10]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.9...v0.1.10
 [0.1.9]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.8...v0.1.9
 [0.1.8]: https://github.com/DazzleTools/wtf-perf/compare/v0.1.7...v0.1.8

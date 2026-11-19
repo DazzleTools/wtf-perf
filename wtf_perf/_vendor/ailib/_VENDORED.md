@@ -137,4 +137,9 @@ Everything the old facade did to compensate for a foreign copy -- the registry r
 
 ### Changes in wtf-perf's copy
 
-None yet.
+- **`cache.py` -- 2026-11-18: the sweep, a caller key, atomic writes, a format version.**
+  - *The sweep deleted host files.* `_sweep` read a missing `cached_at` as 0 and unlinked any dict-shaped `*.json` in the cache directory -- a host's `config.json` placed there was deleted on the first answered call (found by wtf-perf's AI-library consultation, run in a probe). It now removes only JSON objects carrying a numeric `cached_at` older than the TTL; ccs's "any file name" behaviour and its test are unchanged.
+  - *A caller key.* `run(..., key=)` and `cache_key(..., key=)`: when given, the entry is keyed on that key plus the backend's identity and the tool, not on the full prompt. The prompt-derived key made "the same question with fresh evidence" a miss every time; `wtf locked`'s migration off `analyze()` needs its stable-field key back.
+  - *Atomic writes.* An entry is written to a temp file in the same directory and moved into place with `os.replace` (the idiom dazzle-filekit's `atomic_write_text` uses), so a reader never sees half an entry.
+  - *A format version.* Entries carry `"format": 1`; an entry without one reads as format 1, so existing caches stay valid.
+  - Tests: `tests/ailib/test_wtf_perf_changes.py` (5); the ported ccs cache tests still pass.
